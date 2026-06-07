@@ -37,7 +37,7 @@ export async function POST(request: Request) {
         content: userMessageId,
       });
       const result = streamText({
-        model: customModel(modelId),
+        model: customModel('deepseek/deepseek-v4-pro'),
         system: regularPrompt,
         messages: coreMessages,
         maxSteps: 5,
