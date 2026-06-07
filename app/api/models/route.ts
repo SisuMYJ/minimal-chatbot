@@ -1,100 +1,43 @@
-'use client';
-import { startTransition, useEffect, useMemo, useOptimistic, useState } from 'react';
-import { saveModelId } from '@/app/(chat)/actions';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { models as presetModels } from '@/lib/ai/models';
-import { cn } from '@/lib/utils';
-import { CheckCircleFillIcon, ChevronDownIcon } from './icons';
 
-type ModelOption = {
-  apiIdentifier: string;
-  label: string;
-  description?: string;
-};
+// 你最常用的，置顶显示。顺序就是这里的顺序。
+const PRESET_IDS = presetModels.map((m) => m.apiIdentifier);
 
-export function ModelSelector({
-  selectedModelId,
-  className,
-}: {
-  selectedModelId: string;
-} & React.ComponentProps<typeof Button>) {
-  const [open, setOpen] = useState(false);
-  const [optimisticModelId, setOptimisticModelId] = useOptimistic(selectedModelId);
+export async function GET() {
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/models', {
+      headers: {
+        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+      },
+      // 缓存 1 小时，别每次开页面都重拉
+      next: { revalidate: 3600 },
+    });
 
-  // 先用 preset 兜底，拉到 live 再替换
-  const [modelList, setModelList] = useState<ModelOption[]>(
-    presetModels.map((m) => ({
-      apiIdentifier: m.apiIdentifier,
-      label: m.label,
-      description: m.description,
-    })),
-  );
+    if (!res.ok) {
+      // 拉失败就退回你的 preset，至少下拉不空
+      return Response.json({ models: presetModels, source: 'preset-fallback' });
+    }
 
-  useEffect(() => {
-    fetch('/api/models')
-      .then((r) => r.json())
-      .then((d) => {
-        if (d?.models?.length) setModelList(d.models);
-      })
-      .catch(() => {});
-  }, []);
+    const data = await res.json();
 
-  const selectedModel = useMemo(
-    () => modelList.find((m) => m.apiIdentifier === optimisticModelId),
-    [optimisticModelId, modelList],
-  );
+    // OpenRouter 返回 { data: [ { id, name, description, ... }, ... ] }
+    const all = (data.data ?? []).map((m: any) => ({
+      apiIdentifier: m.id,
+      label: m.name ?? m.id,
+      description: '',
+    }));
 
-  return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger
-        asChild
-        className={cn(
-          'w-fit data-[state=open]:bg-accent data-[state=open]:text-accent-foreground',
-          className,
-        )}
-      >
-        <Button variant="outline" className="md:px-2 md:h-[34px]">
-          {selectedModel?.label ?? '选择模型'}
-          <ChevronDownIcon />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        className="min-w-[300px] max-h-[400px] overflow-y-auto"
-      >
-        {modelList.map((model) => (
-          <DropdownMenuItem
-            key={model.apiIdentifier}
-            onSelect={() => {
-              setOpen(false);
-              startTransition(() => {
-                setOptimisticModelId(model.apiIdentifier);
-                saveModelId(model.apiIdentifier);
-              });
-            }}
-            className="gap-4 group/item flex flex-row justify-between items-center"
-            data-active={model.apiIdentifier === optimisticModelId}
-          >
-            <div className="flex flex-col gap-1 items-start">
-              {model.label}
-              {model.description && (
-                <div className="text-xs text-muted-foreground">
-                  {model.description}
-                </div>
-              )}
-            </div>
-            <div className="text-foreground dark:text-foreground opacity-0 group-data-[active=true]/item:opacity-100">
-              <CheckCircleFillIcon />
-            </div>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
+    // 把 preset 命中的挑出来置顶（保留你写的中文 label/description）
+    const presetSet = new Set(PRESET_IDS);
+    const top = presetModels.map((p) => ({
+      apiIdentifier: p.apiIdentifier,
+      label: `★ ${p.label}`,
+      description: p.description,
+    }));
+    const rest = all.filter((m: any) => !presetSet.has(m.apiIdentifier));
+
+    return Response.json({ models: [...top, ...rest], source: 'live' });
+  } catch {
+    return Response.json({ models: presetModels, source: 'preset-fallback' });
+  }
 }
