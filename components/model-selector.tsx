@@ -1,7 +1,5 @@
 'use client';
-
-import { startTransition, useMemo, useOptimistic, useState } from 'react';
-
+import { startTransition, useEffect, useMemo, useOptimistic, useState } from 'react';
 import { saveModelId } from '@/app/(chat)/actions';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,10 +8,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { models } from '@/lib/ai/models';
+import { models as presetModels } from '@/lib/ai/models';
 import { cn } from '@/lib/utils';
-
 import { CheckCircleFillIcon, ChevronDownIcon } from './icons';
+
+type ModelOption = {
+  apiIdentifier: string;
+  label: string;
+  description?: string;
+};
 
 export function ModelSelector({
   selectedModelId,
@@ -22,12 +25,29 @@ export function ModelSelector({
   selectedModelId: string;
 } & React.ComponentProps<typeof Button>) {
   const [open, setOpen] = useState(false);
-  const [optimisticModelId, setOptimisticModelId] =
-    useOptimistic(selectedModelId);
+  const [optimisticModelId, setOptimisticModelId] = useOptimistic(selectedModelId);
+
+  // 先用 preset 兜底，拉到 live 再替换
+  const [modelList, setModelList] = useState<ModelOption[]>(
+    presetModels.map((m) => ({
+      apiIdentifier: m.apiIdentifier,
+      label: m.label,
+      description: m.description,
+    })),
+  );
+
+  useEffect(() => {
+    fetch('/api/models')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.models?.length) setModelList(d.models);
+      })
+      .catch(() => {});
+  }, []);
 
   const selectedModel = useMemo(
-    () => models.find((model) => model.id === optimisticModelId),
-    [optimisticModelId],
+    () => modelList.find((m) => m.apiIdentifier === optimisticModelId),
+    [optimisticModelId, modelList],
   );
 
   return (
@@ -40,24 +60,26 @@ export function ModelSelector({
         )}
       >
         <Button variant="outline" className="md:px-2 md:h-[34px]">
-          {selectedModel?.label}
+          {selectedModel?.label ?? '选择模型'}
           <ChevronDownIcon />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="min-w-[300px]">
-        {models.map((model) => (
+      <DropdownMenuContent
+        align="start"
+        className="min-w-[300px] max-h-[400px] overflow-y-auto"
+      >
+        {modelList.map((model) => (
           <DropdownMenuItem
-            key={model.id}
+            key={model.apiIdentifier}
             onSelect={() => {
               setOpen(false);
-
               startTransition(() => {
-                setOptimisticModelId(model.id);
-                saveModelId(model.id);
+                setOptimisticModelId(model.apiIdentifier);
+                saveModelId(model.apiIdentifier);
               });
             }}
             className="gap-4 group/item flex flex-row justify-between items-center"
-            data-active={model.id === optimisticModelId}
+            data-active={model.apiIdentifier === optimisticModelId}
           >
             <div className="flex flex-col gap-1 items-start">
               {model.label}
