@@ -5,9 +5,7 @@ import {
   smoothStream,
   streamText,
 } from 'ai';
-
 import { customModel } from '@/lib/ai';
-import { models } from '@/lib/ai/models';
 import { regularPrompt } from '@/lib/ai/prompts';
 import { getWeather } from '@/lib/ai/tools/get-weather';
 import { generateUUID, getMostRecentUserMessage } from '@/lib/utils';
@@ -15,7 +13,6 @@ import { generateUUID, getMostRecentUserMessage } from '@/lib/utils';
 export const maxDuration = 60;
 
 type AllowedTools = 'getWeather';
-
 const weatherTools: AllowedTools[] = ['getWeather'];
 const allTools: AllowedTools[] = [...weatherTools];
 
@@ -27,30 +24,25 @@ export async function POST(request: Request) {
   }: { id: string; messages: Array<Message>; modelId: string } =
     await request.json();
 
-  const model = models.find((model) => model.id === modelId);
-
-  if (!model) {
-    return new Response('Model not found', { status: 404 });
+  if (!modelId) {
+    return new Response('No model selected', { status: 400 });
   }
 
   const coreMessages = convertToCoreMessages(messages);
   const userMessage = getMostRecentUserMessage(coreMessages);
-
   if (!userMessage) {
     return new Response('No user message found', { status: 400 });
   }
 
   const userMessageId = generateUUID();
-
   return createDataStreamResponse({
     execute: (dataStream) => {
       dataStream.writeData({
         type: 'user-message-id',
         content: userMessageId,
       });
-
       const result = streamText({
-        model: customModel(model.apiIdentifier),
+        model: customModel(modelId),
         system: regularPrompt,
         messages: coreMessages,
         maxSteps: 5,
@@ -64,7 +56,6 @@ export async function POST(request: Request) {
           functionId: 'stream-text',
         },
       });
-
       result.mergeIntoDataStream(dataStream);
     },
   });
