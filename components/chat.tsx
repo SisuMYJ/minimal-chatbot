@@ -1,7 +1,6 @@
 'use client';
-
+import { useState } from 'react';
 import { useChat } from 'ai/react';
-
 import { ChatHeader } from '@/components/chat-header';
 import { Messages } from './messages';
 import { MultimodalInput } from './multimodal-input';
@@ -13,6 +12,9 @@ export function Chat({
   id: string;
   selectedModelId: string;
 }) {
+  // 把当前模型提升成状态，下拉改它、请求读它
+  const [currentModelId, setCurrentModelId] = useState(selectedModelId);
+
   const {
     messages,
     setMessages,
@@ -25,14 +27,16 @@ export function Chat({
     reload,
   } = useChat({
     id,
-    body: { id, modelId: selectedModelId },
+    body: { id, modelId: currentModelId },
     experimental_throttle: 100,
   });
 
   return (
     <div className="flex flex-col min-w-0 h-dvh bg-background">
-      <ChatHeader selectedModelId={selectedModelId} />
-
+      <ChatHeader
+        selectedModelId={currentModelId}
+        onModelChange={setCurrentModelId}
+      />
       <Messages
         chatId={id}
         isLoading={isLoading}
@@ -40,7 +44,6 @@ export function Chat({
         setMessages={setMessages}
         reload={reload}
       />
-
       <form className="flex mx-auto px-4 bg-background pb-4 md:pb-6 gap-2 w-full md:max-w-3xl">
         <MultimodalInput
           chatId={id}
