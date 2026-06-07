@@ -20,14 +20,13 @@ type ModelOption = {
 
 export function ModelSelector({
   selectedModelId,
+  onModelChange,
   className,
 }: {
   selectedModelId: string;
+  onModelChange: (modelId: string) => void;
 } & React.ComponentProps<typeof Button>) {
   const [open, setOpen] = useState(false);
-
-  // 用本地 state 真正保存选择，不再依赖 cookie 回传
-  const [currentModelId, setCurrentModelId] = useState(selectedModelId);
 
   const [modelList, setModelList] = useState<ModelOption[]>(
     presetModels.map((m) => ({
@@ -47,8 +46,8 @@ export function ModelSelector({
   }, []);
 
   const selectedModel = useMemo(
-    () => modelList.find((m) => m.apiIdentifier === currentModelId),
-    [currentModelId, modelList],
+    () => modelList.find((m) => m.apiIdentifier === selectedModelId),
+    [selectedModelId, modelList],
   );
 
   return (
@@ -74,13 +73,13 @@ export function ModelSelector({
             key={model.apiIdentifier}
             onSelect={() => {
               setOpen(false);
-              setCurrentModelId(model.apiIdentifier);
+              onModelChange(model.apiIdentifier);
               startTransition(() => {
                 saveModelId(model.apiIdentifier);
               });
             }}
             className="gap-4 group/item flex flex-row justify-between items-center"
-            data-active={model.apiIdentifier === currentModelId}
+            data-active={model.apiIdentifier === selectedModelId}
           >
             <div className="flex flex-col gap-1 items-start">
               {model.label}
