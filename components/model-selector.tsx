@@ -1,5 +1,5 @@
 'use client';
-import { startTransition, useEffect, useMemo, useOptimistic, useState } from 'react';
+import { startTransition, useEffect, useMemo, useState } from 'react';
 import { saveModelId } from '@/app/(chat)/actions';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,9 +25,10 @@ export function ModelSelector({
   selectedModelId: string;
 } & React.ComponentProps<typeof Button>) {
   const [open, setOpen] = useState(false);
-  const [optimisticModelId, setOptimisticModelId] = useOptimistic(selectedModelId);
 
-  // 先用 preset 兜底，拉到 live 再替换
+  // 用本地 state 真正保存选择，不再依赖 cookie 回传
+  const [currentModelId, setCurrentModelId] = useState(selectedModelId);
+
   const [modelList, setModelList] = useState<ModelOption[]>(
     presetModels.map((m) => ({
       apiIdentifier: m.apiIdentifier,
@@ -46,8 +47,8 @@ export function ModelSelector({
   }, []);
 
   const selectedModel = useMemo(
-    () => modelList.find((m) => m.apiIdentifier === optimisticModelId),
-    [optimisticModelId, modelList],
+    () => modelList.find((m) => m.apiIdentifier === currentModelId),
+    [currentModelId, modelList],
   );
 
   return (
@@ -73,13 +74,13 @@ export function ModelSelector({
             key={model.apiIdentifier}
             onSelect={() => {
               setOpen(false);
+              setCurrentModelId(model.apiIdentifier);
               startTransition(() => {
-                setOptimisticModelId(model.apiIdentifier);
                 saveModelId(model.apiIdentifier);
               });
             }}
             className="gap-4 group/item flex flex-row justify-between items-center"
-            data-active={model.apiIdentifier === optimisticModelId}
+            data-active={model.apiIdentifier === currentModelId}
           >
             <div className="flex flex-col gap-1 items-start">
               {model.label}
