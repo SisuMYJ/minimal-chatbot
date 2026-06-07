@@ -1,0 +1,100 @@
+'use client';
+import { startTransition, useEffect, useMemo, useOptimistic, useState } from 'react';
+import { saveModelId } from '@/app/(chat)/actions';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { models as presetModels } from '@/lib/ai/models';
+import { cn } from '@/lib/utils';
+import { CheckCircleFillIcon, ChevronDownIcon } from './icons';
+
+type ModelOption = {
+  apiIdentifier: string;
+  label: string;
+  description?: string;
+};
+
+export function ModelSelector({
+  selectedModelId,
+  className,
+}: {
+  selectedModelId: string;
+} & React.ComponentProps<typeof Button>) {
+  const [open, setOpen] = useState(false);
+  const [optimisticModelId, setOptimisticModelId] = useOptimistic(selectedModelId);
+
+  // 先用 preset 兜底，拉到 live 再替换
+  const [modelList, setModelList] = useState<ModelOption[]>(
+    presetModels.map((m) => ({
+      apiIdentifier: m.apiIdentifier,
+      label: m.label,
+      description: m.description,
+    })),
+  );
+
+  useEffect(() => {
+    fetch('/api/models')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.models?.length) setModelList(d.models);
+      })
+      .catch(() => {});
+  }, []);
+
+  const selectedModel = useMemo(
+    () => modelList.find((m) => m.apiIdentifier === optimisticModelId),
+    [optimisticModelId, modelList],
+  );
+
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger
+        asChild
+        className={cn(
+          'w-fit data-[state=open]:bg-accent data-[state=open]:text-accent-foreground',
+          className,
+        )}
+      >
+        <Button variant="outline" className="md:px-2 md:h-[34px]">
+          {selectedModel?.label ?? '选择模型'}
+          <ChevronDownIcon />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="start"
+        className="min-w-[300px] max-h-[400px] overflow-y-auto"
+      >
+        {modelList.map((model) => (
+          <DropdownMenuItem
+            key={model.apiIdentifier}
+            onSelect={() => {
+              setOpen(false);
+              startTransition(() => {
+                setOptimisticModelId(model.apiIdentifier);
+                saveModelId(model.apiIdentifier);
+              });
+            }}
+            className="gap-4 group/item flex flex-row justify-between items-center"
+            data-active={model.apiIdentifier === optimisticModelId}
+          >
+            <div className="flex flex-col gap-1 items-start">
+              {model.label}
+              {model.description && (
+                <div className="text-xs text-muted-foreground">
+                  {model.description}
+                </div>
+              )}
+            </div>
+            <div className="text-foreground dark:text-foreground opacity-0 group-data-[active=true]/item:opacity-100">
+              <CheckCircleFillIcon />
+            </div>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
