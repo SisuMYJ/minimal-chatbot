@@ -51,4 +51,4 @@ export const models: Array<Model> = [
   },
 ] as const;
 
-export const DEFAULT_MODEL_NAME: string = 'gpt-5.5';
+export const DEFAULT_MODEL_NAME: string = 'openai/gpt-5.5';
