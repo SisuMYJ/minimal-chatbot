@@ -49,5 +49,9 @@ export async function POST(request: Request) {
       });
       result.mergeIntoDataStream(dataStream);
     },
+    onError: (error) => {
+      console.error('CHAT ERROR >>>', error);
+      return error instanceof Error ? error.message : JSON.stringify(error);
+    },
   });
 }
