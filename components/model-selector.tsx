@@ -1,5 +1,6 @@
 'use client';
-import { startTransition, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { saveModelId } from '@/app/(chat)/actions';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,6 +28,7 @@ export function ModelSelector({
   onModelChange: (modelId: string) => void;
 } & React.ComponentProps<typeof Button>) {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
 
   const [modelList, setModelList] = useState<ModelOption[]>(
     presetModels.map((m) => ({
@@ -71,12 +73,11 @@ export function ModelSelector({
         {modelList.map((model) => (
           <DropdownMenuItem
             key={model.apiIdentifier}
-            onSelect={() => {
+            onSelect={async () => {
               setOpen(false);
               onModelChange(model.apiIdentifier);
-              startTransition(() => {
-                saveModelId(model.apiIdentifier);
-              });
+              await saveModelId(model.apiIdentifier);
+              router.refresh();
             }}
             className="gap-4 group/item flex flex-row justify-between items-center"
             data-active={model.apiIdentifier === selectedModelId}
