@@ -13,7 +13,7 @@ export default async function Page() {
 
   return (
     <>
-      <Chat key={id} id={id} selectedModelId={selectedModelId} />
+    <Chat id={id} selectedModelId={selectedModelId} />
     </>
   );
 }
