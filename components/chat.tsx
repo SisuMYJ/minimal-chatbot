@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useChat } from 'ai/react';
 import { ChatHeader } from '@/components/chat-header';
 import { Messages } from './messages';
@@ -13,12 +13,6 @@ export function Chat({
   selectedModelId: string;
 }) {
   const [currentModelId, setCurrentModelId] = useState(selectedModelId);
-
-  // 把当前选中的模型存进 ref，让发请求时永远拿到最新值，不被重建冲掉
-  const modelIdRef = useRef(currentModelId);
-  useEffect(() => {
-    modelIdRef.current = currentModelId;
-  }, [currentModelId]);
 
   const {
     messages,
