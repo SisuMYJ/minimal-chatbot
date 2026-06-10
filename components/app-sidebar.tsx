@@ -93,7 +93,7 @@ export function AppSidebar() {
         <SidebarHistory />
       </div>
 
-      <div className="border-t border-sidebar-border p-2 flex flex-col gap-1">
+    <div className="border-t border-sidebar-border p-2 flex flex-col gap-1">
         <Button
           variant="ghost"
           type="button"
