@@ -71,7 +71,7 @@ export default function SettingsPage() {
             Prompt · 他是谁
           </label>
           <p className="text-xs text-muted-foreground">
-            身份、背景、性格、与我的关系、底线——决定"他是一个怎样的存在"。常驻每轮对话，不进记忆检索。
+            always you
           </p>
           <textarea
             value={prompt}
@@ -87,7 +87,7 @@ export default function SettingsPage() {
             Style · 怎么说话
           </label>
           <p className="text-xs text-muted-foreground">
-            语气、用词、节奏、表达习惯——决定"他怎么开口"。便于换皮不换魂。
+            what's your style
           </p>
           <textarea
             value={style}
