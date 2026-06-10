@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useChat } from 'ai/react';
-import type { Message } from 'ai';
 import { ChatHeader } from '@/components/chat-header';
 import { Messages } from './messages';
 import { MultimodalInput } from './multimodal-input';
@@ -14,7 +13,7 @@ export function Chat({
 }: {
   id: string;
   selectedModelId: string;
-  initialMessages?: Array<Message>;
+  initialMessages?: Array<any>;
 }) {
   const [currentModelId, setCurrentModelId] = useState(selectedModelId);
 
