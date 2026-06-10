@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import {
   Sidebar,
   SidebarHeader,
-  SidebarContent,
   SidebarMenu,
   useSidebar,
 } from '@/components/ui/sidebar';
@@ -55,9 +54,24 @@ export function AppSidebar() {
           </div>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+
+      <div className="flex-1 overflow-y-auto">
         <SidebarHistory />
-      </SidebarContent>
+      </div>
+
+      <div className="border-t border-sidebar-border p-2">
+        <Button
+          variant="ghost"
+          type="button"
+          className="w-full justify-start text-sm"
+          onClick={() => {
+            setOpenMobile(false);
+            router.push('/settings');
+          }}
+        >
+          人设设置
+        </Button>
+      </div>
     </Sidebar>
   );
 }
