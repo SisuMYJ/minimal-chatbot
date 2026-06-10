@@ -1,6 +1,8 @@
 'use client';
+
 import { useState } from 'react';
 import { useChat } from 'ai/react';
+import type { Message } from 'ai';
 import { ChatHeader } from '@/components/chat-header';
 import { Messages } from './messages';
 import { MultimodalInput } from './multimodal-input';
@@ -8,9 +10,11 @@ import { MultimodalInput } from './multimodal-input';
 export function Chat({
   id,
   selectedModelId,
+  initialMessages = [],
 }: {
   id: string;
   selectedModelId: string;
+  initialMessages?: Array<Message>;
 }) {
   const [currentModelId, setCurrentModelId] = useState(selectedModelId);
 
@@ -26,6 +30,7 @@ export function Chat({
     reload,
   } = useChat({
     id,
+    initialMessages,
     body: { id, modelId: currentModelId },
     experimental_throttle: 100,
   });
