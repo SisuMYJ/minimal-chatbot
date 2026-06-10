@@ -1,39 +1,49 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 
-// 沉淀：回看最近一段对话，按"完整意思"切成多条记忆，提名进待审区(status=pending)。
-// 设计：用便宜模型(deepseek)做切分提炼，省 token。
-// 触发：前端在"检测到距上次对话超过4小时"或"用户手动点沉淀"时调用本接口。
-const SEDIMENT_MODEL = "deepseek/deepseek-v4-flash"; // 便宜模型做沉淀，省钱
-const GAP_HOURS = 4; // 跨段阈值：超过这么久没新对话，视为上一段结束
+// 沉淀：只处理"上次沉淀之后"的新对话，按"完整意思"切成精炼记忆，提名进待审区。
+const SEDIMENT_MODEL = "deepseek/deepseek-v4-flash";
+const GAP_HOURS = 4;
 
 export async function POST(req: Request) {
   try {
-    // 入参：{ sessionId?: string, force?: boolean }
-    // force=true 表示手动立即沉淀，跳过4小时判断
     const body = await req.json().catch(() => ({}));
     const sessionId: string | null = body.sessionId ?? null;
     const force: boolean = body.force ?? false;
 
-    // 1) 取这个会话最近的对话原文（最多取最近 40 条，够沉淀一段了）
+    if (!sessionId) {
+      return NextResponse.json({ ok: false, error: "缺少 sessionId" }, { status: 400 });
+    }
+
+    // 读这个会话上次沉淀到哪了
+    const { data: sessionRow } = await supabaseAdmin
+      .from("sessions")
+      .select("last_sediment_at")
+      .eq("id", sessionId)
+      .maybeSingle();
+    const lastSedimentAt = sessionRow?.last_sediment_at ?? null;
+
+    // 取"上次沉淀之后"的新消息（没沉淀过的）
     let q = supabaseAdmin
       .from("messages")
       .select("role, content, created_at")
-      .order("created_at", { ascending: false })
-      .limit(40);
-    if (sessionId) q = q.eq("session_id", sessionId);
+      .eq("session_id", sessionId)
+      .order("created_at", { ascending: true });
+    if (lastSedimentAt) {
+      q = q.gt("created_at", lastSedimentAt);
+    }
+    const { data: newMsgs, error: msgErr } = await q;
 
-    const { data: recent, error: msgErr } = await q;
     if (msgErr) {
       return NextResponse.json({ ok: false, step: "fetch_messages", error: msgErr.message }, { status: 500 });
     }
-    if (!recent || recent.length === 0) {
-      return NextResponse.json({ ok: true, message: "没有可沉淀的对话。", nominated: [] });
+    if (!newMsgs || newMsgs.length === 0) {
+      return NextResponse.json({ ok: true, message: "没有新内容需要沉淀。", nominated: [] });
     }
 
-    // 2) 跨段判断：最近一条消息距现在是否超过4小时（force 时跳过）
-    const lastTime = new Date(recent[0].created_at).getTime();
-    const hoursSince = (Date.now() - lastTime) / (1000 * 60 * 60);
+    // 跨段判断：最新一条距现在是否超过4小时（force 时跳过）
+    const latestTime = new Date(newMsgs[newMsgs.length - 1].created_at).getTime();
+    const hoursSince = (Date.now() - latestTime) / (1000 * 60 * 60);
     if (!force && hoursSince < GAP_HOURS) {
       return NextResponse.json({
         ok: true,
@@ -43,9 +53,8 @@ export async function POST(req: Request) {
       });
     }
 
-    // 3) 把对话整理成时间正序文本，喂给便宜模型做切分
-    const ordered = [...recent].reverse();
-    const transcript = ordered
+    // 整理成文本喂给便宜模型
+    const transcript = newMsgs
       .map((m) => `[${m.role}] ${m.content}`)
       .join("\n");
 
@@ -80,7 +89,6 @@ ${transcript}`;
 
     const aiData = await aiRes.json();
     let raw = aiData?.choices?.[0]?.message?.content ?? "[]";
-    // 去掉可能的 ```json 包裹
     raw = raw.replace(/```json|```/g, "").trim();
 
     let memories: string[] = [];
@@ -91,11 +99,19 @@ ${transcript}`;
       return NextResponse.json({ ok: false, step: "parse", error: "模型返回不是合法JSON", raw }, { status: 500 });
     }
 
+    // 不管有没有提炼出记忆，都推进"沉淀进度"到最新消息时间——
+    // 这样已经看过的这批消息，下次不会再被沉淀（防重复的关键）
+    const newWatermark = newMsgs[newMsgs.length - 1].created_at;
+    await supabaseAdmin
+      .from("sessions")
+      .update({ last_sediment_at: newWatermark })
+      .eq("id", sessionId);
+
     if (memories.length === 0) {
-      return NextResponse.json({ ok: true, message: "这段对话没有值得沉淀的记忆点。", nominated: [] });
+      return NextResponse.json({ ok: true, message: "这段新对话没有值得沉淀的记忆点。", nominated: [] });
     }
 
-    // 4) 提名进待审区：status=pending、source=ai，先不向量化（等你 Review 通过后再向量化存入）
+    // 提名进待审区
     const rows = memories.map((content) => ({
       content,
       source: "ai",
@@ -112,7 +128,7 @@ ${transcript}`;
 
     return NextResponse.json({
       ok: true,
-      message: `沉淀完成，提名了 ${inserted.length} 条记忆进待审区，等你 Review。`,
+      message: `沉淀完成，提名了 ${inserted.length} 条记忆进待审区。`,
       nominated: inserted,
     });
   } catch (e) {
