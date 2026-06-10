@@ -93,19 +93,7 @@ export function AppSidebar() {
         <SidebarHistory />
       </div>
 
-    <div className="border-t border-sidebar-border p-2 flex flex-col gap-1">
-        <Button
-          variant="ghost"
-          type="button"
-          className="w-full justify-start text-sm"
-          disabled={sedimenting}
-          onClick={sedimentNow}
-        >
-          {sedimenting ? '沉淀中…' : '立即沉淀这段'}
-        </Button>
-        {sedimentHint && (
-          <span className="px-2 text-xs text-muted-foreground">{sedimentHint}</span>
-        )}
+   <div className="border-t border-sidebar-border p-2 flex flex-col gap-1">
         <Button
           variant="ghost"
           type="button"
@@ -129,6 +117,7 @@ export function AppSidebar() {
           人设设置
         </Button>
       </div>
+      
     </Sidebar>
   );
 }
