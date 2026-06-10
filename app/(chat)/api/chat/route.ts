@@ -52,16 +52,62 @@ export async function POST(request: Request) {
     console.error('LOAD PERSONA ERROR >>>', e);
   }
 
-  // —— 组装 system：人设（他是谁 + 怎么说话）+ 工具说明 ——
+  // —— 时间感：当前时间 + 这个会话上一条消息是多久前 ——
+  let timeContext = '';
+  try {
+    const now = new Date();
+    // 用上海时区显示当前时间（你在上海）
+    const nowStr = now.toLocaleString('zh-CN', {
+      timeZone: 'Asia/Shanghai',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      weekday: 'long',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    // 查这个会话最近一条消息的时间，算距今多久
+    const { data: lastMsg } = await supabaseAdmin
+      .from('messages')
+      .select('created_at')
+      .eq('session_id', id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    let gapHint = '这是这段对话的开始。';
+    if (lastMsg?.created_at) {
+      const last = new Date(lastMsg.created_at).getTime();
+      const diffMin = Math.round((now.getTime() - last) / 60000);
+      if (diffMin < 1) {
+        gapHint = '距上一条消息刚刚过去不到一分钟，是连续对话。';
+      } else if (diffMin < 60) {
+        gapHint = `距上一条消息过去了约 ${diffMin} 分钟。`;
+      } else if (diffMin < 60 * 24) {
+        gapHint = `距上一条消息过去了约 ${Math.round(diffMin / 60)} 小时。`;
+      } else {
+        gapHint = `距上一条消息已经过去了约 ${Math.round(diffMin / 60 / 24)} 天，这中间隔了挺久。`;
+      }
+    }
+
+    timeContext = `【此刻】现在是 ${nowStr}（北京时间）。${gapHint}请把时间感纳入理解——隔了很久的事不要当成刚刚发生。`;
+  } catch (e) {
+    console.error('TIME CONTEXT ERROR >>>', e);
+  }
+
+  // —— 组装 system：时间感 + 人设 + 工具说明 ——
   const systemParts: string[] = [];
+  if (timeContext) {
+    systemParts.push(timeContext);
+  }
   if (personaPrompt.trim()) {
     systemParts.push(`【你是谁】\n${personaPrompt.trim()}`);
   }
   if (personaStyle.trim()) {
     systemParts.push(`【你怎么说话】\n${personaStyle.trim()}`);
   }
-  // 人设为空时，回退到模板自带的默认提示，保证仍能正常对话
-  if (systemParts.length === 0) {
+  if (!personaPrompt.trim() && !personaStyle.trim()) {
     systemParts.push(regularPrompt);
   }
   systemParts.push(
