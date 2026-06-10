@@ -36,7 +36,40 @@ export async function POST(request: Request) {
 
   const userMessageId = generateUUID();
 
-  // —— 落库 1：确保 session 存在（不存在就建，标题默认编号）——
+  // —— 读常驻人设层（Prompt + Style）——
+  let personaPrompt = '';
+  let personaStyle = '';
+  try {
+    const { data: settingRows } = await supabaseAdmin
+      .from('settings')
+      .select('key, value')
+      .in('key', ['prompt', 'style']);
+    (settingRows ?? []).forEach((row) => {
+      if (row.key === 'prompt') personaPrompt = row.value || '';
+      if (row.key === 'style') personaStyle = row.value || '';
+    });
+  } catch (e) {
+    console.error('LOAD PERSONA ERROR >>>', e);
+  }
+
+  // —— 组装 system：人设（他是谁 + 怎么说话）+ 工具说明 ——
+  const systemParts: string[] = [];
+  if (personaPrompt.trim()) {
+    systemParts.push(`【你是谁】\n${personaPrompt.trim()}`);
+  }
+  if (personaStyle.trim()) {
+    systemParts.push(`【你怎么说话】\n${personaStyle.trim()}`);
+  }
+  // 人设为空时，回退到模板自带的默认提示，保证仍能正常对话
+  if (systemParts.length === 0) {
+    systemParts.push(regularPrompt);
+  }
+  systemParts.push(
+    `你有一个 searchMemory 工具，可以检索你和对方过往对话中沉淀下来的长期记忆。当对方提到过去的事、你需要回忆起关于对方的偏好/经历/关系/情绪，或任何"你应该记得"的内容时，主动调用它。不要在每句话都调用——只在真正需要回忆时调用。检索回来的记忆请自然地融入回应，不要生硬复述。`
+  );
+  const systemPrompt = systemParts.join('\n\n');
+
+  // —— 落库 1：确保 session 存在 ——
   try {
     const { data: existing } = await supabaseAdmin
       .from('sessions')
@@ -52,7 +85,6 @@ export async function POST(request: Request) {
         .from('sessions')
         .insert({ id, title: `对话 ${(count ?? 0) + 1}` });
     } else {
-      // 已存在的会话，更新它的 updated_at，让它排到列表最前
       await supabaseAdmin
         .from('sessions')
         .update({ updated_at: new Date().toISOString() })
@@ -86,11 +118,7 @@ export async function POST(request: Request) {
 
       const result = streamText({
         model: customModel(modelId),
-        system: `${regularPrompt}
-
-你有一个 searchMemory 工具，可以检索你和对方过往对话中沉淀下来的长期记忆。
-当对方提到过去的事、你需要回忆起关于对方的偏好/经历/关系/情绪，或任何"你应该记得"的内容时，主动调用它。
-不要在每句话都调用——只在真正需要回忆时调用。检索回来的记忆请自然地融入回应，不要生硬复述。`,
+        system: systemPrompt,
         messages: coreMessages,
         maxSteps: 5,
         tools: {
@@ -138,7 +166,6 @@ export async function POST(request: Request) {
           isEnabled: true,
           functionId: 'stream-text',
         },
-        // —— 落库 3：AI 回复完成后，存 AI 这条消息 ——
         onFinish: async ({ text }) => {
           try {
             if (text && text.trim()) {
