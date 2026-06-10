@@ -36,6 +36,47 @@ export async function POST(request: Request) {
 
   const userMessageId = generateUUID();
 
+  // —— 落库 1：确保 session 存在（不存在就建，标题默认编号）——
+  try {
+    const { data: existing } = await supabaseAdmin
+      .from('sessions')
+      .select('id')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (!existing) {
+      const { count } = await supabaseAdmin
+        .from('sessions')
+        .select('id', { count: 'exact', head: true });
+      await supabaseAdmin
+        .from('sessions')
+        .insert({ id, title: `对话 ${(count ?? 0) + 1}` });
+    } else {
+      // 已存在的会话，更新它的 updated_at，让它排到列表最前
+      await supabaseAdmin
+        .from('sessions')
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', id);
+    }
+  } catch (e) {
+    console.error('SESSION UPSERT ERROR >>>', e);
+  }
+
+  // —— 落库 2：存用户这条消息 ——
+  try {
+    const userText =
+      typeof userMessage.content === 'string'
+        ? userMessage.content
+        : JSON.stringify(userMessage.content);
+    await supabaseAdmin.from('messages').insert({
+      session_id: id,
+      role: 'user',
+      content: userText,
+    });
+  } catch (e) {
+    console.error('USER MESSAGE SAVE ERROR >>>', e);
+  }
+
   return createDataStreamResponse({
     execute: (dataStream) => {
       dataStream.writeData({
@@ -74,7 +115,6 @@ export async function POST(request: Request) {
                 if (error) {
                   return { found: false, error: error.message, memories: [] };
                 }
-                // 只保留相似度过得去的，过滤掉明显无关的
                 const filtered = (data ?? []).filter(
                   (m: { similarity: number }) => m.similarity > 0.15,
                 );
@@ -97,6 +137,20 @@ export async function POST(request: Request) {
         experimental_telemetry: {
           isEnabled: true,
           functionId: 'stream-text',
+        },
+        // —— 落库 3：AI 回复完成后，存 AI 这条消息 ——
+        onFinish: async ({ text }) => {
+          try {
+            if (text && text.trim()) {
+              await supabaseAdmin.from('messages').insert({
+                session_id: id,
+                role: 'assistant',
+                content: text,
+              });
+            }
+          } catch (e) {
+            console.error('ASSISTANT MESSAGE SAVE ERROR >>>', e);
+          }
         },
       });
 
