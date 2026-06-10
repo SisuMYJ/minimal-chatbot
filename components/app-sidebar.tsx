@@ -2,16 +2,18 @@
 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
 import { PlusIcon } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import {
   Sidebar,
   SidebarHeader,
+  SidebarContent,
   SidebarMenu,
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { SidebarHistory } from './sidebar-history';
+import { generateUUID } from '@/lib/utils';
 
 export function AppSidebar() {
   const router = useRouter();
@@ -41,8 +43,8 @@ export function AppSidebar() {
                   className="p-2 h-fit"
                   onClick={() => {
                     setOpenMobile(false);
-                    router.push('/');
-                    router.refresh();
+                    const newId = generateUUID();
+                    router.push(`/chat/${newId}`);
                   }}
                 >
                   <PlusIcon />
@@ -53,6 +55,9 @@ export function AppSidebar() {
           </div>
         </SidebarMenu>
       </SidebarHeader>
+      <SidebarContent>
+        <SidebarHistory />
+      </SidebarContent>
     </Sidebar>
   );
 }
