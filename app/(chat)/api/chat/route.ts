@@ -139,7 +139,34 @@ export async function POST(request: Request) {
   } catch (e) {
     console.error('SESSION UPSERT ERROR >>>', e);
   }
+  
+// —— 4小时跨段自动沉淀：回到这个会话且距上条>4小时，先沉淀上一段 ——
+  try {
+    const { data: lastForSediment } = await supabaseAdmin
+      .from('messages')
+      .select('created_at')
+      .eq('session_id', id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
+    if (lastForSediment?.created_at) {
+      const gapMs = Date.now() - new Date(lastForSediment.created_at).getTime();
+      const fourHours = 4 * 60 * 60 * 1000;
+      if (gapMs > fourHours) {
+        // 异步触发沉淀，不阻塞当前对话（沉淀接口自己会判断+切分）
+        const origin = new URL(request.url).origin;
+        fetch(`${origin}/api/memory/sediment`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: id }),
+        }).catch((e) => console.error('AUTO SEDIMENT TRIGGER ERROR >>>', e));
+      }
+    }
+  } catch (e) {
+    console.error('SEDIMENT CHECK ERROR >>>', e);
+  }
+  
   // —— 落库 2：存用户这条消息 ——
   try {
     const userText =
