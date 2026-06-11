@@ -96,10 +96,11 @@ export function SidebarHistory() {
             </button>
           </ContextMenuTrigger>
           <ContextMenuContent>
-            <ContextMenuItem
-              onClick={() => {
-                setEditingId(s.id);
+          <ContextMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
                 setEditingTitle(s.title);
+                setTimeout(() => setEditingId(s.id), 50);
               }}
             >
               改名
