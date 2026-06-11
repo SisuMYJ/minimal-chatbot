@@ -97,10 +97,15 @@ export function SidebarHistory() {
           </ContextMenuTrigger>
           <ContextMenuContent>
           <ContextMenuItem
-              onSelect={(e) => {
-                e.preventDefault();
-                setEditingTitle(s.title);
-                setTimeout(() => setEditingId(s.id), 50);
+              onSelect={() => {
+                const title = window.prompt('新名字', s.title);
+                if (title && title.trim()) {
+                  fetch('/api/sessions', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: s.id, title: title.trim() }),
+                  }).then(() => load());
+                }
               }}
             >
               改名
