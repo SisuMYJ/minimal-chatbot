@@ -9,7 +9,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 export async function GET() {
   const { data, error } = await supabaseAdmin
     .from("sessions")
-    .select("id, title, created_at, updated_at")
+    .select("id, title, folder, created_at, updated_at")
     .order("updated_at", { ascending: false });
 
   if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
