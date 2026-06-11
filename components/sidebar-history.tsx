@@ -86,9 +86,10 @@ export function SidebarHistory() {
       ) : (
       <ContextMenu>
           <ContextMenuTrigger asChild>
-            <button
+<button
               type="button"
-              className="flex-1 truncate text-left cursor-pointer"
+              className="flex-1 truncate text-left cursor-pointer select-none"
+              style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none' }}
               onClick={() => router.push(`/chat/${s.id}`)}
             >
               {s.title}
