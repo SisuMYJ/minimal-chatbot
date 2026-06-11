@@ -109,18 +109,44 @@ const PurePreviewMessage = ({
                 {message.toolInvocations.map((toolInvocation) => {
                   const { toolName, toolCallId, state, args } = toolInvocation;
 
-                  if (state === 'result') {
+                 if (state === 'result') {
                     const { result } = toolInvocation;
 
-                    return (
-                      <div key={toolCallId}>
-                        {toolName === 'getWeather' ? (
+                    if (toolName === 'getWeather') {
+                      return (
+                        <div key={toolCallId}>
                           <Weather weatherAtLocation={result} />
-                        ) : (
-                          <pre>{JSON.stringify(result, null, 2)}</pre>
-                        )}
-                      </div>
-                    );
+                        </div>
+                      );
+                    }
+
+                    if (toolName === 'searchMemory') {
+                      const memCount = result?.memories?.length ?? 0;
+                      if (!result?.found || memCount === 0) {
+                        return (
+                          <details key={toolCallId} className="text-xs text-muted-foreground">
+                            <summary className="cursor-pointer select-none opacity-60 hover:opacity-100">
+                              翻了下记忆，没找到相关的
+                            </summary>
+                          </details>
+                        );
+                      }
+                      return (
+                        <details key={toolCallId} className="text-xs text-muted-foreground">
+                          <summary className="cursor-pointer select-none opacity-60 hover:opacity-100">
+                            想起了 {memCount} 条相关记忆
+                          </summary>
+                          <ul className="mt-1 ml-4 list-disc flex flex-col gap-1">
+                            {result.memories.map((m: { content: string; similarity: number }, i: number) => (
+                              <li key={i}>{m.content}</li>
+                            ))}
+                          </ul>
+                        </details>
+                      );
+                    }
+
+                    // 其他未知工具，保底不显示生 JSON
+                    return null;
                   }
                   return (
                     <div
