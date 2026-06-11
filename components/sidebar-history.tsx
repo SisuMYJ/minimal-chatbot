@@ -3,11 +3,11 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu';
 
 type Session = {
   id: string;
@@ -84,34 +84,33 @@ export function SidebarHistory() {
           className="flex-1 bg-transparent outline-none border-b border-border"
         />
       ) : (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+      <ContextMenu>
+          <ContextMenuTrigger asChild>
             <button
               type="button"
               className="flex-1 truncate text-left cursor-pointer"
               onClick={() => router.push(`/chat/${s.id}`)}
-              onContextMenu={(e) => e.preventDefault()}
             >
               {s.title}
             </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" side="right">
-            <DropdownMenuItem
+          </ContextMenuTrigger>
+          <ContextMenuContent>
+            <ContextMenuItem
               onClick={() => {
                 setEditingId(s.id);
                 setEditingTitle(s.title);
               }}
             >
               改名
-            </DropdownMenuItem>
-            <DropdownMenuItem
+            </ContextMenuItem>
+            <ContextMenuItem
               className="text-destructive focus:text-destructive"
               onClick={() => handleDelete(s.id)}
             >
               删除
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
       )}
     </div>
   );
