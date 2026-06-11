@@ -2,6 +2,12 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 type Session = {
   id: string;
@@ -52,7 +58,6 @@ export function SidebarHistory() {
     load();
   };
 
-  // 拆成「无文件夹的」和「各文件夹的」
   const loose = sessions.filter((s) => !s.folder);
   const folders: Record<string, Session[]> = {};
   sessions.filter((s) => s.folder).forEach((s) => {
@@ -62,7 +67,7 @@ export function SidebarHistory() {
   const renderItem = (s: Session) => (
     <div
       key={s.id}
-      className={`group flex items-center justify-between rounded-md px-2 py-1.5 text-sm hover:bg-muted cursor-pointer ${
+      className={`group flex items-center justify-between rounded-md px-2 py-1.5 text-sm hover:bg-muted ${
         s.id === currentId ? 'bg-muted font-medium' : ''
       }`}
     >
@@ -79,33 +84,35 @@ export function SidebarHistory() {
           className="flex-1 bg-transparent outline-none border-b border-border"
         />
       ) : (
-        <span className="flex-1 truncate" onClick={() => router.push(`/chat/${s.id}`)}>
-          {s.title}
-        </span>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="flex-1 truncate text-left cursor-pointer"
+              onClick={() => router.push(`/chat/${s.id}`)}
+              onContextMenu={(e) => e.preventDefault()}
+            >
+              {s.title}
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" side="right">
+            <DropdownMenuItem
+              onClick={() => {
+                setEditingId(s.id);
+                setEditingTitle(s.title);
+              }}
+            >
+              改名
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={() => handleDelete(s.id)}
+            >
+              删除
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
-      <div className="hidden group-hover:flex gap-1 ml-2">
-        <button
-          type="button"
-          className="text-xs text-muted-foreground hover:text-foreground"
-          onClick={(e) => {
-            e.stopPropagation();
-            setEditingId(s.id);
-            setEditingTitle(s.title);
-          }}
-        >
-          改名
-        </button>
-        <button
-          type="button"
-          className="text-xs text-muted-foreground hover:text-destructive"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDelete(s.id);
-          }}
-        >
-          删除
-        </button>
-      </div>
     </div>
   );
 
@@ -115,10 +122,8 @@ export function SidebarHistory() {
 
   return (
     <div className="flex flex-col gap-1 px-2 py-2">
-      {/* 无文件夹的对话，直接列在上面 */}
       {loose.map(renderItem)}
 
-      {/* 各文件夹，折叠 */}
       {Object.entries(folders).map(([name, items]) => (
         <div key={name} className="mt-1">
           <button
