@@ -94,6 +94,10 @@ export function AppSidebar() {
       </div>
 
    <div className="border-t border-sidebar-border p-2 flex flex-col gap-1">
+       <Button variant="ghost" type="button" className="w-full justify-start text-sm"
+          onClick={() => { setOpenMobile(false); router.push('/pinned-models'); }}>
+          置顶模型
+        </Button>
         <Button
           variant="ghost"
           type="button"
