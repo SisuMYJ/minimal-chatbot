@@ -271,7 +271,7 @@ export async function POST(request: Request) {
           isEnabled: true,
           functionId: 'stream-text',
         },
-onFinish: async ({ text, usage }) => {
+        onFinish: async ({ text, usage }) => {
           try {
             if (text && text.trim()) {
               await supabaseAdmin.from('messages').insert({
@@ -298,7 +298,7 @@ onFinish: async ({ text, usage }) => {
             console.error('USAGE LOG ERROR >>>', e);
           }
         },
-
+        });
       result.mergeIntoDataStream(dataStream);
     },
     onError: (error) => {
