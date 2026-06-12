@@ -82,7 +82,7 @@ export default function ChapterPage() {
       body: JSON.stringify({ workId: Number(workId), chapterNo, content }),
     })
       .then((r) => r.json())
-      .then((d) => alert(d.ok ? `已定稿存档。Claude记下了 ${d.added} 条伏笔/设定。` : '已定稿，但抽取出错。'))
+      .then((d) => alert(d.ok ? `已定稿存档。Claude记下 ${d.addedTracks ?? 0} 条伏笔、补充 ${d.addedInfo ?? 0} 条基本设定。` : '已定稿，但抽取出错。'))
       .catch(() => alert('已定稿存档。'));
   };
 
