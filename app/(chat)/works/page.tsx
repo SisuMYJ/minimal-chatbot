@@ -58,7 +58,17 @@ export default function WorksPage() {
     await fetch(`/api/works?id=${w.id}`, { method: 'DELETE' });
     load();
   };
-
+const renameWork = async (w: Work) => {
+    const title = window.prompt('作品名', w.title);
+    if (title !== null && title.trim()) {
+      await fetch('/api/works', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: w.id, title: title.trim() }),
+      });
+      load();
+    }
+  };
   const novels = works.filter((w) => w.kind === 'novel');
   const ideas = works.filter((w) => w.kind === 'idea');
 
@@ -84,7 +94,7 @@ export default function WorksPage() {
           ) : novels.length === 0 ? (
             <p className="text-sm text-muted-foreground">还没有正文。</p>
           ) : (
-            novels.map((w) => (
+          novels.map((w) => (
               <div key={w.id} className="rounded-lg border border-border p-4 flex items-center justify-between">
                 <button
                   type="button"
@@ -93,8 +103,12 @@ export default function WorksPage() {
                 >
                   {w.title}
                 </button>
-                <Button variant="ghost" className="text-destructive" onClick={() => del(w)}>删除</Button>
+                <div className="flex gap-1">
+                  <Button variant="ghost" onClick={() => renameWork(w)}>改名</Button>
+                  <Button variant="ghost" className="text-destructive" onClick={() => del(w)}>删除</Button>
+                </div>
               </div>
+            ))
             ))
           )}
         </section>
@@ -117,7 +131,8 @@ export default function WorksPage() {
                 >
                   {w.title}
                 </button>
-                <div className="flex gap-1">
+              <div className="flex gap-1">
+                  <Button variant="ghost" onClick={() => renameWork(w)}>改名</Button>
                   <Button variant="ghost" onClick={() => toNovel(w)}>开篇转正文</Button>
                   <Button variant="ghost" className="text-destructive" onClick={() => del(w)}>删除</Button>
                 </div>
