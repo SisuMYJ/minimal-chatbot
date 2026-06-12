@@ -60,6 +60,23 @@ const PurePreviewMessage = ({
           )}
 
           <div className="flex flex-col gap-2 w-full">
+            {/* 图片附件 */}
+            {message.experimental_attachments &&
+              message.experimental_attachments.length > 0 && (
+                <div className="flex flex-wrap gap-2 justify-end">
+                  {message.experimental_attachments.map((att, i) => (
+                    att.contentType?.startsWith('image/') ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        key={i}
+                        src={att.url}
+                        alt={att.name || 'image'}
+                        className="max-w-[240px] rounded-lg border border-border"
+                      />
+                    ) : null
+                  ))}
+                </div>
+              )}
             {message.content && mode === 'view' && (
               <div className="flex flex-row gap-2 items-start">
                 {message.role === 'user' && (
