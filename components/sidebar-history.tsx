@@ -21,8 +21,6 @@ export function SidebarHistory() {
   const params = useParams();
   const currentId = (params?.id as string) || '';
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingTitle, setEditingTitle] = useState('');
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
 
   const load = useCallback(async () => {
@@ -39,16 +37,18 @@ export function SidebarHistory() {
     load();
   }, [load, currentId]);
 
-  const handleRename = async (id: string) => {
-    const title = editingTitle.trim();
-    setEditingId(null);
-    if (!title) return;
+  const patchSession = async (id: string, body: Record<string, unknown>) => {
     await fetch('/api/sessions', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, title }),
+      body: JSON.stringify({ id, ...body }),
     });
     load();
+  };
+
+  const handleRename = (s: Session) => {
+    const title = window.prompt('新名字', s.title);
+    if (title && title.trim()) patchSession(s.id, { title: title.trim() });
   };
 
   const handleDelete = async (id: string) => {
@@ -58,6 +58,21 @@ export function SidebarHistory() {
     load();
   };
 
+  const handleMove = (s: Session) => {
+    // 现有文件夹列表（去重）
+    const existing = Array.from(
+      new Set(sessions.map((x) => x.folder).filter(Boolean) as string[]),
+    );
+    const hint =
+      existing.length > 0
+        ? `输入文件夹名（移进去）。\n现有文件夹：${existing.join('、')}\n留空=移出文件夹`
+        : '输入文件夹名（新建并移进去）。留空=移出文件夹';
+    const folder = window.prompt(hint, s.folder || '');
+    if (folder === null) return; // 取消
+    patchSession(s.id, { folder: folder.trim() ? folder.trim() : null });
+  };
+
+  // 分组
   const loose = sessions.filter((s) => !s.folder);
   const folders: Record<string, Session[]> = {};
   sessions.filter((s) => s.folder).forEach((s) => {
@@ -67,58 +82,32 @@ export function SidebarHistory() {
   const renderItem = (s: Session) => (
     <div
       key={s.id}
-      className={`group flex items-center justify-between rounded-md px-2 py-1.5 text-sm hover:bg-muted ${
+      className={`group flex items-center rounded-md px-2 py-1.5 text-sm hover:bg-muted ${
         s.id === currentId ? 'bg-muted font-medium' : ''
       }`}
     >
-      {editingId === s.id ? (
-        <input
-          autoFocus
-          value={editingTitle}
-          onChange={(e) => setEditingTitle(e.target.value)}
-          onBlur={() => handleRename(s.id)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') handleRename(s.id);
-            if (e.key === 'Escape') setEditingId(null);
-          }}
-          className="flex-1 bg-transparent outline-none border-b border-border"
-        />
-      ) : (
       <ContextMenu>
-          <ContextMenuTrigger asChild>
-<button
-              type="button"
-              className="flex-1 truncate text-left cursor-pointer select-none"
-              style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none' }}
-              onClick={() => router.push(`/chat/${s.id}`)}
-            >
-              {s.title}
-            </button>
-          </ContextMenuTrigger>
-          <ContextMenuContent>
+        <ContextMenuTrigger asChild>
+          <button
+            type="button"
+            className="flex-1 truncate text-left cursor-pointer select-none"
+            style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none' }}
+            onClick={() => router.push(`/chat/${s.id}`)}
+          >
+            {s.title}
+          </button>
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <ContextMenuItem onSelect={() => handleRename(s)}>改名</ContextMenuItem>
+          <ContextMenuItem onSelect={() => handleMove(s)}>移到文件夹…</ContextMenuItem>
           <ContextMenuItem
-              onSelect={() => {
-                const title = window.prompt('新名字', s.title);
-                if (title && title.trim()) {
-                  fetch('/api/sessions', {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: s.id, title: title.trim() }),
-                  }).then(() => load());
-                }
-              }}
-            >
-              改名
-            </ContextMenuItem>
-            <ContextMenuItem
-              className="text-destructive focus:text-destructive"
-              onClick={() => handleDelete(s.id)}
-            >
-              删除
-            </ContextMenuItem>
-          </ContextMenuContent>
-        </ContextMenu>
-      )}
+            className="text-destructive focus:text-destructive"
+            onSelect={() => handleDelete(s.id)}
+          >
+            删除
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
     </div>
   );
 
@@ -128,8 +117,10 @@ export function SidebarHistory() {
 
   return (
     <div className="flex flex-col gap-1 px-2 py-2">
+      {/* 无文件夹的对话 */}
       {loose.map(renderItem)}
 
+      {/* 文件夹（折叠） */}
       {Object.entries(folders).map(([name, items]) => (
         <div key={name} className="mt-1">
           <button
