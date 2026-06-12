@@ -65,9 +65,9 @@ const PurePreviewMessage = ({
               message.experimental_attachments.length > 0 && (
                 <div className="flex flex-wrap gap-2 justify-end">
                   {message.experimental_attachments.map((att, i) => (
-                    att.contentType?.startsWith('image/') ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                     key={i}
+                   att.contentType?.startsWith('image/') ? (
+                      
+                        key={i}
                         href={att.url}
                         target="_blank"
                         rel="noopener noreferrer"
