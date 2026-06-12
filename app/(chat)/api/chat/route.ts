@@ -226,7 +226,7 @@ export async function POST(request: Request) {
         system: systemPrompt,
         messages: coreMessages,
         maxSteps: 5,
-        tools: {
+tools: {
           searchMemory: tool({
             description:
               '检索与当前对话相关的长期记忆。当需要回忆关于对方的事实、偏好、经历、关系或过往对话内容时调用。',
@@ -234,30 +234,7 @@ export async function POST(request: Request) {
               query: z
                 .string()
                 .describe('用于检索记忆的查询语句，描述你想回忆起什么'),
-              addReminder: tool({
-            description:
-              '当用户表达"提醒我做某事"、"记一下我要…"、"别让我忘了…"等需要记待办/提醒的意图时调用。把要提醒的事和时间记下来。',
-            parameters: z.object({
-              content: z.string().describe('要提醒的事情'),
-              remind_at: z
-                .string()
-                .optional()
-                .describe('提醒时间，ISO格式（如2026-06-13T15:00:00+08:00）。用户没明确说时间就留空。'),
             }),
-            execute: async ({ content, remind_at }) => {
-              try {
-                await supabaseAdmin.from('reminders').insert({
-                  content,
-                  remind_at: remind_at || null,
-                });
-                return { ok: true, saved: content, time: remind_at || '未指定时间' };
-              } catch (e) {
-                return { ok: false, error: String(e) };
-              }
-            },
-          }),
-            }),
-            
             execute: async ({ query }) => {
               try {
                 const queryVector = await embed(query);
@@ -285,6 +262,28 @@ export async function POST(request: Request) {
                 };
               } catch (e) {
                 return { found: false, error: String(e), memories: [] };
+              }
+            },
+          }),
+          addReminder: tool({
+            description:
+              '当用户表达"提醒我做某事"、"记一下我要…"、"别让我忘了…"等需要记待办/提醒的意图时调用。把要提醒的事和时间记下来。',
+            parameters: z.object({
+              content: z.string().describe('要提醒的事情'),
+              remind_at: z
+                .string()
+                .optional()
+                .describe('提醒时间，ISO格式（如2026-06-13T15:00:00+08:00）。用户没明确说时间就留空。'),
+            }),
+            execute: async ({ content, remind_at }) => {
+              try {
+                await supabaseAdmin.from('reminders').insert({
+                  content,
+                  remind_at: remind_at || null,
+                });
+                return { ok: true, saved: content, time: remind_at || '未指定时间' };
+              } catch (e) {
+                return { ok: false, error: String(e) };
               }
             },
           }),
