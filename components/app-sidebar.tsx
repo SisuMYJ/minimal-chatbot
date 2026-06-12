@@ -100,6 +100,17 @@ export function AppSidebar() {
           className="w-full justify-start text-sm"
           onClick={() => {
             setOpenMobile(false);
+            router.push('/works');
+          }}
+        >
+          写作区
+        </Button>
+        <Button
+          variant="ghost"
+          type="button"
+          className="w-full justify-start text-sm"
+          onClick={() => {
+            setOpenMobile(false);
             router.push('/memory');
           }}
         >
