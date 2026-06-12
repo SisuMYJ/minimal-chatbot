@@ -14,12 +14,6 @@ import { MessageEditor } from './message-editor';
 import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Weather } from './weather';
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from '@/components/ui/context-menu';
 
 const PurePreviewMessage = ({
   chatId,
@@ -109,37 +103,14 @@ const PurePreviewMessage = ({
                   </Tooltip>
                 )}
 
-         {message.role === 'assistant' ? (
-                  <ContextMenu>
-                    <ContextMenuTrigger asChild>
-                      <div className="flex flex-col gap-4 cursor-default select-text">
-                        <Markdown>{message.content}</Markdown>
-                      </div>
-                    </ContextMenuTrigger>
-                    <ContextMenuContent>
-                      <ContextMenuItem
-                        onSelect={async () => {
-                          await fetch('/api/favorite-message', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ content: message.content }),
-                          });
-                        }}
-                      >
-                        收藏到寄语
-                      </ContextMenuItem>
-                    </ContextMenuContent>
-                  </ContextMenu>
-                ) : (
-                  <div
-                    className={cn('flex flex-col gap-4', {
-                      'bg-primary text-primary-foreground px-3 py-2 rounded-xl':
-                        message.role === 'user',
-                    })}
-                  >
-                    <Markdown>{message.content}</Markdown>
-                  </div>
-                )}
+<div
+                  className={cn('flex flex-col gap-4', {
+                    'bg-primary text-primary-foreground px-3 py-2 rounded-xl':
+                      message.role === 'user',
+                  })}
+                >
+                  <Markdown>{message.content}</Markdown>
+                </div>
               </div>
             )}
 
