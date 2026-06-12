@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 import { useLocalStorage, useWindowSize } from 'usehooks-ts';
 
 import { sanitizeUIMessages } from '@/lib/utils';
-import { ArrowUpIcon, StopIcon, PaperclipIcon } from './icons';
+import { ArrowUpIcon, StopIcon, PaperclipIcon, SmileIcon } from './icons';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 
@@ -68,6 +68,40 @@ function PureMultimodalInput({
   const { width } = useWindowSize();
   const [attachments, setAttachments] = useState<{ url: string; name: string; type: string }[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [showStickers, setShowStickers] = useState(false);
+  const [stickers, setStickers] = useState<{ id: number; url: string }[]>([]);
+
+  const loadStickers = useCallback(async () => {
+    const res = await fetch('/api/stickers');
+    const data = await res.json();
+    if (data.ok) setStickers(data.stickers);
+  }, []);
+
+  useEffect(() => { loadStickers(); }, [loadStickers]);
+
+  const uploadSticker = async (file: File) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await fetch('/api/upload', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.ok) {
+      await fetch('/api/stickers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: data.url }),
+      });
+      loadStickers();
+    }
+  };
+
+  const sendSticker = (url: string) => {
+    setShowStickers(false);
+    append({
+      role: 'user',
+      content: '',
+      experimental_attachments: [{ url, contentType: 'image/png', name: 'sticker' }],
+    } as any);
+  };
 
   useEffect(() => {
     if (textareaRef.current) adjustHeight(textareaRef);
@@ -190,8 +224,8 @@ function PureMultimodalInput({
         }}
       />
 
-      {/* 上传按钮（左下） */}
-      <div className="absolute bottom-0 left-0 p-2">
+    {/* 左下：上传 + 表情 */}
+      <div className="absolute bottom-0 left-0 p-2 flex gap-1">
         <Button
           type="button"
           variant="ghost"
@@ -201,7 +235,39 @@ function PureMultimodalInput({
         >
           {uploading ? '…' : <PaperclipIcon size={16} />}
         </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          className="rounded-full p-1.5 h-fit"
+          onClick={() => setShowStickers((v) => !v)}
+        >
+          <SmileIcon size={16} />
+        </Button>
       </div>
+
+      {/* 表情面板 */}
+      {showStickers && (
+        <div className="absolute bottom-14 left-0 z-10 w-72 max-h-64 overflow-y-auto rounded-xl border border-border bg-background p-2 shadow-lg">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <span className="text-xs text-muted-foreground">我的表情</span>
+            <button
+              type="button"
+              className="text-xs hover:text-foreground"
+              onClick={() => stickerInputRef.current?.click()}
+            >
+              + 上传
+            </button>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {stickers.map((s) => (
+              <button key={s.id} type="button" onClick={() => sendSticker(s.url)}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={s.url} alt="sticker" className="size-14 object-cover rounded-md hover:ring-2 ring-foreground" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 发送/停止（右下） */}
       <div className="absolute bottom-0 right-0 p-2 w-fit flex flex-row justify-end">
