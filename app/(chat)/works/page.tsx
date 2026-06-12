@@ -109,7 +109,6 @@ const renameWork = async (w: Work) => {
                 </div>
               </div>
             ))
-            ))
           )}
         </section>
 
