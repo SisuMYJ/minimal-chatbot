@@ -65,6 +65,7 @@ function PureMultimodalInput({
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const stickerInputRef = useRef<HTMLInputElement>(null);
   const { width } = useWindowSize();
   const [attachments, setAttachments] = useState<{ url: string; name: string; type: string }[]>([]);
   const [uploading, setUploading] = useState(false);
