@@ -67,7 +67,10 @@ export default function WorksPage() {
       <div className="mx-auto w-full max-w-3xl px-4 py-8 flex flex-col gap-8">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold">写作区</h1>
-          <Button variant="ghost" onClick={() => router.push('/')}>返回对话</Button>
+      <div className="flex gap-2">
+            <Button variant="ghost" onClick={() => router.push('/editors')}>编辑名单</Button>
+            <Button variant="ghost" onClick={() => router.push('/')}>返回对话</Button>
+          </div>
         </div>
 
         {/* 正文 */}
