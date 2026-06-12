@@ -12,7 +12,17 @@ import { regularPrompt } from '@/lib/ai/prompts';
 import { generateUUID, getMostRecentUserMessage } from '@/lib/utils';
 import { supabaseAdmin } from '@/lib/supabase';
 import { embed } from '@/lib/embedding';
-
+function weatherDesc(code: number): string {
+  if (code === 0) return "晴";
+  if (code <= 3) return "多云";
+  if (code <= 48) return "雾";
+  if (code <= 67) return "下雨";
+  if (code <= 77) return "下雪";
+  if (code <= 82) return "阵雨";
+  if (code <= 86) return "阵雪";
+  if (code <= 99) return "雷雨";
+  return "未知";
+}
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
@@ -95,7 +105,26 @@ export async function POST(request: Request) {
   } catch (e) {
     console.error('TIME CONTEXT ERROR >>>', e);
   }
-
+// —— 天气隐藏通道：查上海天气，悄悄注入（不显示卡片）——
+  let weatherText = "";
+  try {
+    // 上海坐标
+    const wRes = await fetch(
+      "https://api.open-meteo.com/v1/forecast?latitude=31.23&longitude=121.47&current=temperature_2m,weather_code&timezone=Asia/Shanghai",
+      { signal: AbortSignal.timeout(3000) },
+    );
+    if (wRes.ok) {
+      const wData = await wRes.json();
+      const temp = wData?.current?.temperature_2m;
+      const code = wData?.current?.weather_code;
+      const desc = weatherDesc(code);
+      if (temp !== undefined) {
+        weatherText = `【上海此刻天气】${temp}°C，${desc}。（你知道我所在的天气处境即可，不用刻意提，除非相关）`;
+      }
+    }
+  } catch {
+    // 查不到就算了，不影响聊天
+  }
   // —— 组装 system：时间感 + 人设 + 工具说明 ——
   const systemParts: string[] = [];
   if (timeContext) {
