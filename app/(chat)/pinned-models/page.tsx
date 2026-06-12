@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 
-type M = { id: string; name: string; vision: boolean };
+type M = { id: string; name: string; vision: boolean; promptPrice: number | null; completionPrice: number | null };
 
 export default function PinnedModelsPage() {
   const router = useRouter();
@@ -84,9 +84,15 @@ export default function PinnedModelsPage() {
             return (
               <div key={m.id} className={`rounded-lg border p-2 flex items-center gap-3 ${on ? 'border-foreground' : 'border-border'}`}>
                 <input type="checkbox" checked={on} onChange={() => toggle(m.id)} className="size-4 shrink-0" />
-                <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0">
                   <div className="text-sm truncate">{m.name}</div>
                   <div className="text-xs text-muted-foreground truncate">{m.id}{m.vision ? ' · 👁可看图' : ''}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {m.promptPrice !== null
+                      ? `入 $${m.promptPrice.toFixed(2)} / 出 $${(m.completionPrice ?? 0).toFixed(2)}（每百万token）`
+                      : '价格未知'}
+                    {m.promptPrice === 0 && m.completionPrice === 0 ? ' · 免费' : ''}
+                  </div>
                 </div>
               </div>
             );
