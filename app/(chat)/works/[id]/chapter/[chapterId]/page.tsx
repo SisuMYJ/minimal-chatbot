@@ -148,7 +148,45 @@ export default function ChapterPage() {
     ];
     await streamSend(sendMessages, editor.model, activeTab);
   };
+  // 自己检索前文（不发给AI，结果列出来自己看）
+  const [myHits, setMyHits] = useState<{ chapter_no: number; title: string; snippet: string }[] | null>(null);
 
+  const searchPriorSelf = async () => {
+    const kw = window.prompt('搜已定稿章节（自己看）');
+    if (!kw || !kw.trim()) return;
+    const res = await fetch(`/api/writing-search?work_id=${workId}&kw=${encodeURIComponent(kw.trim())}`);
+    const data = await res.json();
+    if (data.ok) setMyHits(data.hits);
+  };
+// 按关键词检索已定稿前文，把片段发给当前编辑对照
+  const searchPrior = async () => {
+    if (streaming || !activeTab) return;
+    const editor = editors.find((e) => e.tag === activeTab);
+    if (!editor) return;
+    const kw = window.prompt('输入要检索的关键词（在已定稿章节里找）');
+    if (!kw || !kw.trim()) return;
+
+    const res = await fetch(`/api/writing-search?work_id=${workId}&kw=${encodeURIComponent(kw.trim())}`);
+    const data = await res.json();
+    if (!data.ok || data.hits.length === 0) {
+      setConvos((prev) => ({ ...prev, [activeTab]: [...(prev[activeTab] || []), { role: 'user', content: `（检索「${kw}」：前文没找到相关内容）` }] }));
+      return;
+    }
+
+    const priorText = data.hits
+      .map((h: { chapter_no: number; snippet: string }) => `【第${h.chapter_no}章】${h.snippet}`)
+      .join('\n\n');
+
+    const note = `我想检查当前这章和前文「${kw}」相关内容是否呼应/一致。以下是前文里相关的片段，请你对照当前章节，看是否呼应得上、有无矛盾：\n\n${priorText}`;
+
+    setConvos((prev) => ({ ...prev, [activeTab]: [...(prev[activeTab] || []), { role: 'user', content: `（检索前文「${kw}」，找到 ${data.hits.length} 处，请编辑对照）` }] }));
+
+    const sendMessages = [
+      ...(convos[activeTab] || []).map((m) => ({ role: m.role, content: m.content })),
+      { role: 'user', content: note },
+    ];
+    await streamSend(sendMessages, editor.model, activeTab);
+  };
   // C方案：把当前正文同步给当前编辑
   const syncDoc = async () => {
     if (streaming || !activeTab) return;
@@ -219,7 +257,24 @@ export default function ChapterPage() {
               </button>
             ))}
           </div>
-
+             {myHits !== null && (
+            <div className="border-b border-border p-3 max-h-48 overflow-y-auto text-sm bg-muted/30">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs text-muted-foreground">我搜到的前文（{myHits.length}处）</span>
+                <button onClick={() => setMyHits(null)} className="text-xs hover:text-foreground">关闭</button>
+              </div>
+              {myHits.length === 0 ? (
+                <p className="text-xs text-muted-foreground">没找到。</p>
+              ) : (
+                myHits.map((h, i) => (
+                  <div key={i} className="mb-2">
+                    <span className="text-xs font-medium">第{h.chapter_no}章 {h.title}</span>
+                    <p className="text-xs text-muted-foreground whitespace-pre-wrap">{h.snippet}</p>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
             {activeConvo.length === 0 ? (
               <p className="text-sm text-muted-foreground">
@@ -239,10 +294,20 @@ export default function ChapterPage() {
           </div>
 
           <div className="border-t border-border p-3 flex flex-col gap-2">
-            <button onClick={syncDoc} disabled={streaming}
-              className="self-start text-xs text-muted-foreground hover:text-foreground underline">
-              同步最新正文给「{activeEditor?.name}」
-            </button>
+           <div className="flex gap-3">
+             <button onClick={searchPriorSelf} disabled={streaming}
+                className="text-xs text-muted-foreground hover:text-foreground underline">
+                我自己搜前文
+              </button>
+              <button onClick={syncDoc} disabled={streaming}
+                className="text-xs text-muted-foreground hover:text-foreground underline">
+                同步最新正文
+              </button>
+              <button onClick={searchPrior} disabled={streaming}
+                className="text-xs text-muted-foreground hover:text-foreground underline">
+                检索前文对照
+              </button>
+            </div>
             <div className="flex gap-2">
               <textarea value={input} onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
