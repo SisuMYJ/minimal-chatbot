@@ -66,7 +66,7 @@ const PurePreviewMessage = ({
                 <div className="flex flex-wrap gap-2 justify-end">
                   {message.experimental_attachments.map((att, i) => (
                    att.contentType?.startsWith('image/') ? (
-                      
+                        <a
                         key={i}
                         href={att.url}
                         target="_blank"
