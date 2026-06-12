@@ -55,17 +55,23 @@ export async function POST(req: Request) {
 
     // 整理成文本喂给便宜模型
     const transcript = newMsgs
-      .map((m) => `[${m.role}] ${m.content}`)
+      .map((m) => `${m.role === "user" ? "我（阿竫）" : "AI"}：${m.content}`)
       .join("\n");
 
-    const sedimentPrompt = `下面是一段对话记录。请你从中提炼出"值得长期记住的记忆点"。
+const sedimentPrompt = `下面是"我（阿竫）"和"AI"的一段对话记录。请你站在"我（阿竫）"的角度，提炼出"我"值得长期记住的记忆点。
+
+重要：对话里标注"我（阿竫）"的才是我本人，标注"AI"的是我的AI伴侣。所有记忆都要从"我（阿竫）"的第一人称视角书写——记的是关于我的事实、我的情绪、我的偏好、我和AI的关系。绝不要把AI说的话当成我说的，也不要把视角搞反。
+
 要求：
 1. 按"一个完整的意思"切分，一条记忆只承载一个完整的点。
 2. 每条控制在 1-2 句话，简洁有焦点，像日记里的一句心声，不要写成一大段叙述、不要堆砌细节。
-3. 用第一人称、带恰当的情感色彩书写（站在"我"的角度），但情感是点到为止的温度，不是冗长的抒情。
+3. 用第一人称（"我"=阿竫）、带恰当的情感色彩书写，但情感是点到为止的温度，不是冗长的抒情。
 4. 只记真正有长期价值的：事实、偏好、情绪、关系、重要决定、独特观点。跳过寒暄、临时性的、无记忆价值的内容。
 5. 如果这段对话没有值得记的，返回空数组。
 6. 严格只返回 JSON 数组，形如 ["记忆1","记忆2"]，不要任何额外解释、不要 markdown 代码块。
+
+对话记录：
+${transcript}`;
 
 对话记录：
 ${transcript}`;
@@ -88,7 +94,7 @@ ${transcript}`;
     }
 
     const aiData = await aiRes.json();
-    let raw = aiData?.choices?.[0]?.message?.content ?? "[]";
+let raw = aiData?.choices?.[0]?.message?.content ?? "[]";
     raw = raw.replace(/```json|```/g, "").trim();
 
     let memories: string[] = [];
@@ -96,7 +102,19 @@ ${transcript}`;
       memories = JSON.parse(raw);
       if (!Array.isArray(memories)) memories = [];
     } catch {
-      return NextResponse.json({ ok: false, step: "parse", error: "模型返回不是合法JSON", raw }, { status: 500 });
+      // 容错：模型有时在 JSON 前后裹了多余的话，尝试抠出 [...] 部分再解析
+      const match = raw.match(/\[[\s\S]*\]/);
+      if (match) {
+        try {
+          memories = JSON.parse(match[0]);
+          if (!Array.isArray(memories)) memories = [];
+        } catch {
+          memories = [];
+        }
+      } else {
+        // 实在没有数组结构，说明这段没提炼出来，当作"无可沉淀"，不报错
+        memories = [];
+      }
     }
 
     // 不管有没有提炼出记忆，都推进"沉淀进度"到最新消息时间——
