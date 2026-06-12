@@ -139,6 +139,9 @@ export async function POST(request: Request) {
   if (!personaPrompt.trim() && !personaStyle.trim()) {
     systemParts.push(regularPrompt);
   }
+  if (weatherText) {
+    systemParts.push(weatherText);
+  }
   systemParts.push(
     `你有一个 searchMemory 工具，可以检索你和对方过往对话中沉淀下来的长期记忆。当对方提到过去的事、你需要回忆起关于对方的偏好/经历/关系/情绪，或任何"你应该记得"的内容时，主动调用它。不要在每句话都调用——只在真正需要回忆时调用。检索回来的记忆请自然地融入回应，不要生硬复述。`
   );
@@ -268,7 +271,7 @@ export async function POST(request: Request) {
           isEnabled: true,
           functionId: 'stream-text',
         },
-        onFinish: async ({ text }) => {
+onFinish: async ({ text, usage }) => {
           try {
             if (text && text.trim()) {
               await supabaseAdmin.from('messages').insert({
@@ -280,8 +283,21 @@ export async function POST(request: Request) {
           } catch (e) {
             console.error('ASSISTANT MESSAGE SAVE ERROR >>>', e);
           }
+          // 存这轮 token 消耗
+          try {
+            if (usage) {
+              await supabaseAdmin.from('usage_log').insert({
+                session_id: id,
+                model: modelId,
+                prompt_tokens: usage.promptTokens ?? null,
+                completion_tokens: usage.completionTokens ?? null,
+                total_tokens: usage.totalTokens ?? null,
+              });
+            }
+          } catch (e) {
+            console.error('USAGE LOG ERROR >>>', e);
+          }
         },
-      });
 
       result.mergeIntoDataStream(dataStream);
     },
