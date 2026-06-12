@@ -186,11 +186,12 @@ const PurePreviewMessage = ({
               </div>
             )}
 
-            <MessageActions
+          <MessageActions
               key={`action-${message.id}`}
               chatId={chatId}
               message={message}
               isLoading={isLoading}
+              reload={reload}
             />
           </div>
         </div>
