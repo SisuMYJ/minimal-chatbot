@@ -67,12 +67,19 @@ const PurePreviewMessage = ({
                   {message.experimental_attachments.map((att, i) => (
                     att.contentType?.startsWith('image/') ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        key={i}
-                        src={att.url}
-                        alt={att.name || 'image'}
-                        className="max-w-[240px] rounded-lg border border-border"
-                      />
+                     key={i}
+                        href={att.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download={att.name || 'image'}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={att.url}
+                          alt={att.name || 'image'}
+                          className="max-w-[240px] rounded-lg border border-border hover:opacity-90 cursor-pointer"
+                        />
+                      </a>
                     ) : null
                   ))}
                 </div>
