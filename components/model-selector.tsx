@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { saveModelId } from '@/app/(chat)/actions';
@@ -29,7 +30,6 @@ export function ModelSelector({
 } & React.ComponentProps<typeof Button>) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
-
   const [modelList, setModelList] = useState<ModelOption[]>(
     presetModels.map((m) => ({
       apiIdentifier: m.apiIdentifier,
@@ -39,10 +39,21 @@ export function ModelSelector({
   );
 
   useEffect(() => {
-    fetch('/api/models')
+    // 读置顶模型设置，过滤列表；没设置就全显示
+    fetch('/api/settings')
       .then((r) => r.json())
       .then((d) => {
-        if (d?.models?.length) setModelList(d.models);
+        if (d?.ok && d.settings?.pinned_models) {
+          const pinned: string[] = JSON.parse(d.settings.pinned_models);
+          const filtered = presetModels
+            .filter((m) => pinned.includes(m.apiIdentifier))
+            .map((m) => ({
+              apiIdentifier: m.apiIdentifier,
+              label: m.label,
+              description: m.description,
+            }));
+          if (filtered.length > 0) setModelList(filtered);
+        }
       })
       .catch(() => {});
   }, []);
