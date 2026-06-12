@@ -39,23 +39,28 @@ export function ModelSelector({
   );
 
   useEffect(() => {
-    // 读置顶模型设置，过滤列表；没设置就全显示
-    fetch('/api/settings')
-      .then((r) => r.json())
-      .then((d) => {
-        if (d?.ok && d.settings?.pinned_models) {
-          const pinned: string[] = JSON.parse(d.settings.pinned_models);
-          const filtered = presetModels
-            .filter((m) => pinned.includes(m.apiIdentifier))
-            .map((m) => ({
-              apiIdentifier: m.apiIdentifier,
-              label: m.label,
-              description: m.description,
-            }));
-          if (filtered.length > 0) setModelList(filtered);
+    (async () => {
+      try {
+        const [sRes, mRes] = await Promise.all([
+          fetch('/api/settings').then((r) => r.json()),
+          fetch('/api/all-models').then((r) => r.json()),
+        ]);
+        if (sRes?.ok && sRes.settings?.pinned_models) {
+          const pinned: string[] = JSON.parse(sRes.settings.pinned_models);
+          const allModels = mRes?.ok ? mRes.models : [];
+          const list: ModelOption[] = pinned.map((id) => {
+            const found = allModels.find((m: { id: string }) => m.id === id);
+            const preset = presetModels.find((m) => m.apiIdentifier === id);
+            return {
+              apiIdentifier: id,
+              label: found?.name || preset?.label || id,
+              description: found?.vision ? '可看图' : preset?.description,
+            };
+          });
+          if (list.length > 0) setModelList(list);
         }
-      })
-      .catch(() => {});
+      } catch {}
+    })();
   }, []);
 
   const selectedModel = useMemo(
