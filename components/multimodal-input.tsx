@@ -179,7 +179,16 @@ function PureMultimodalInput({
           e.target.value = '';
         }}
       />
-
+      <input
+        ref={stickerInputRef}
+        type="file"
+        accept="image/*,image/gif"
+        className="hidden"
+        onChange={(e) => {
+          if (e.target.files && e.target.files[0]) uploadSticker(e.target.files[0]);
+          e.target.value = '';
+        }}
+      />
       {/* 附件预览 */}
       {attachments.length > 0 && (
         <div className="flex flex-wrap gap-2">
