@@ -133,7 +133,7 @@ function PureMultimodalInput({
   }, [handleSubmit, setLocalStorageInput, width, chatId, attachments]);
 
   return (
-    <div className="relative w-full flex flex-col gap-4">
+    <div className="relative w-full flex flex-col gap-4 max-w-full overflow-x-hidden">
       <input
         ref={fileInputRef}
         type="file"
