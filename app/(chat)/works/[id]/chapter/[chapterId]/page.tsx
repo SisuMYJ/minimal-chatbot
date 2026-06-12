@@ -67,15 +67,23 @@ export default function ChapterPage() {
     setSavingDoc(false);
   };
 
-  const finalize = async () => {
-    if (!confirm('确定这章定稿吗？定稿后会存档。')) return;
+ const finalize = async () => {
+    if (!confirm('确定这章定稿吗？定稿后会存档，并由Claude抽取伏笔/设定。')) return;
     await fetch('/api/chapters', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: Number(chapterId), content, status: 'final' }),
     });
     setStatus('final');
-    alert('已定稿存档。');
+    // 触发Claude管账（不阻塞）
+    fetch('/api/writing-finalize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ workId: Number(workId), chapterNo, content }),
+    })
+      .then((r) => r.json())
+      .then((d) => alert(d.ok ? `已定稿存档。Claude记下了 ${d.added} 条伏笔/设定。` : '已定稿，但抽取出错。'))
+      .catch(() => alert('已定稿存档。'));
   };
 
   // 流式发送通用函数
