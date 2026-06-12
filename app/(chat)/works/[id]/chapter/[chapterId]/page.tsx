@@ -26,7 +26,6 @@ export default function ChapterPage() {
   const [streaming, setStreaming] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // 读编辑名单
   useEffect(() => {
     (async () => {
       const res = await fetch('/api/settings');
@@ -53,10 +52,7 @@ export default function ChapterPage() {
     }
   }, [chapterId]);
 
-  useEffect(() => {
-    loadChapter();
-  }, [loadChapter]);
-
+  useEffect(() => { loadChapter(); }, [loadChapter]);
   useEffect(() => {
     scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
   }, [convos, activeTab]);
@@ -82,52 +78,23 @@ export default function ChapterPage() {
     alert('已定稿存档。');
   };
 
-  const send = async () => {
-    const text = input.trim();
-    if (!text || streaming || !activeTab) return;
-    const editor = editors.find((e) => e.tag === activeTab);
-    if (!editor) return;
-
-    const isFirst = (convos[activeTab] || []).length === 0;
-    const userContent = isFirst
-      ? `这是我的章节正文，请你看完给改稿意见：\n\n${content}\n\n———\n我的话：${text}`
-      : text;
-
-    const displayMsg: Msg = { role: 'user', content: text };
-    setConvos((prev) => ({ ...prev, [activeTab]: [...(prev[activeTab] || []), displayMsg] }));
-    setInput('');
+  // 流式发送通用函数
+  const streamSend = async (sendMessages: { role: string; content: string }[], model: string, tab: string) => {
     setStreaming(true);
-
-    const sendMessages = [
-      ...(convos[activeTab] || []).map((m) => ({ role: m.role, content: m.content })),
-      { role: 'user' as const, content: userContent },
-    ];
-
     try {
       const res = await fetch('/api/writing-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: sendMessages,
-          model: editor.model,
-          workId: Number(workId),
-        }),
+        body: JSON.stringify({ messages: sendMessages, model, workId: Number(workId) }),
       });
-
       if (!res.ok || !res.body) {
-        setConvos((prev) => ({
-          ...prev,
-          [activeTab]: [...(prev[activeTab] || []), { role: 'assistant', content: '（出错了，稍后再试）' }],
-        }));
-        setStreaming(false);
+        setConvos((prev) => ({ ...prev, [tab]: [...(prev[tab] || []), { role: 'assistant', content: '（出错了，稍后再试）' }] }));
         return;
       }
-
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let acc = '';
-      setConvos((prev) => ({ ...prev, [activeTab]: [...(prev[activeTab] || []), { role: 'assistant', content: '' }] }));
-
+      setConvos((prev) => ({ ...prev, [tab]: [...(prev[tab] || []), { role: 'assistant', content: '' }] }));
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -143,21 +110,49 @@ export default function ChapterPage() {
             if (delta) {
               acc += delta;
               setConvos((prev) => {
-                const arr = [...(prev[activeTab] || [])];
+                const arr = [...(prev[tab] || [])];
                 arr[arr.length - 1] = { role: 'assistant', content: acc };
-                return { ...prev, [activeTab]: arr };
+                return { ...prev, [tab]: arr };
               });
             }
-          } catch {
-            // 忽略
-          }
+          } catch {}
         }
       }
-    } catch (e) {
-      console.error(e);
     } finally {
       setStreaming(false);
     }
+  };
+
+  const send = async () => {
+    const text = input.trim();
+    if (!text || streaming || !activeTab) return;
+    const editor = editors.find((e) => e.tag === activeTab);
+    if (!editor) return;
+    const isFirst = (convos[activeTab] || []).length === 0;
+    const userContent = isFirst
+      ? `这是我的章节正文，请你看完给改稿意见：\n\n${content}\n\n———\n我的话：${text}`
+      : text;
+    setConvos((prev) => ({ ...prev, [activeTab]: [...(prev[activeTab] || []), { role: 'user', content: text }] }));
+    setInput('');
+    const sendMessages = [
+      ...(convos[activeTab] || []).map((m) => ({ role: m.role, content: m.content })),
+      { role: 'user', content: userContent },
+    ];
+    await streamSend(sendMessages, editor.model, activeTab);
+  };
+
+  // C方案：把当前正文同步给当前编辑
+  const syncDoc = async () => {
+    if (streaming || !activeTab) return;
+    const editor = editors.find((e) => e.tag === activeTab);
+    if (!editor) return;
+    const note = '【我更新了正文，请基于这个最新版本继续，之前的旧版作废】';
+    setConvos((prev) => ({ ...prev, [activeTab]: [...(prev[activeTab] || []), { role: 'user', content: '（已同步最新正文）' }] }));
+    const sendMessages = [
+      ...(convos[activeTab] || []).map((m) => ({ role: m.role, content: m.content })),
+      { role: 'user', content: `${note}\n\n最新正文：\n\n${content}` },
+    ];
+    await streamSend(sendMessages, editor.model, activeTab);
   };
 
   const activeConvo = convos[activeTab] || [];
@@ -191,7 +186,7 @@ export default function ChapterPage() {
       <div className="flex flex-1 min-h-0">
         <div className="w-1/2 flex flex-col border-r border-border">
           <div className="px-4 py-2 text-xs text-muted-foreground border-b border-border flex justify-between items-center">
-            <span>章节正文</span>
+            <span>章节正文（在Word写好，贴进来给编辑看）</span>
             <button onClick={saveDoc} className="hover:text-foreground">
               {savingDoc ? '保存中…' : '保存正文'}
             </button>
@@ -200,7 +195,7 @@ export default function ChapterPage() {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             onBlur={saveDoc}
-            placeholder="在这里写或粘贴章节正文……"
+            placeholder="把Word里觉得可以的版本贴进来……"
             className="flex-1 w-full p-4 text-sm leading-relaxed outline-none resize-none bg-transparent"
           />
         </div>
@@ -208,15 +203,10 @@ export default function ChapterPage() {
         <div className="w-1/2 flex flex-col">
           <div className="flex border-b border-border overflow-x-auto">
             {editors.map((e) => (
-              <button
-                key={e.tag}
-                onClick={() => setActiveTab(e.tag)}
+              <button key={e.tag} onClick={() => setActiveTab(e.tag)}
                 className={`flex-1 min-w-fit px-3 py-2 text-sm whitespace-nowrap ${
-                  activeTab === e.tag
-                    ? 'border-b-2 border-foreground font-medium'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
+                  activeTab === e.tag ? 'border-b-2 border-foreground font-medium' : 'text-muted-foreground hover:text-foreground'
+                }`}>
                 {e.name}
               </button>
             ))}
@@ -225,16 +215,14 @@ export default function ChapterPage() {
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
             {activeConvo.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                发第一句话，会自动带上左边的章节正文给「{activeEditor?.name}」看。每个编辑独立，互不影响。
+                发第一句话，会自动带上左边正文给「{activeEditor?.name}」看。改了正文后点下面「同步最新正文」让它看新版。每个编辑独立。
               </p>
             ) : (
               activeConvo.map((m, i) => (
                 <div key={i} className={m.role === 'user' ? 'text-right' : ''}>
-                  <div
-                    className={`inline-block rounded-lg px-3 py-2 text-sm whitespace-pre-wrap text-left max-w-[90%] ${
-                      m.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'
-                    }`}
-                  >
+                  <div className={`inline-block rounded-lg px-3 py-2 text-sm whitespace-pre-wrap text-left max-w-[90%] ${
+                    m.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                  }`}>
                     {m.content}
                   </div>
                 </div>
@@ -242,23 +230,19 @@ export default function ChapterPage() {
             )}
           </div>
 
-          <div className="border-t border-border p-3 flex gap-2">
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  send();
-                }
-              }}
-              rows={2}
-              placeholder={`对「${activeEditor?.name}」说…（Enter发送，Shift+Enter换行）`}
-              className="flex-1 rounded-md border border-border bg-transparent p-2 text-sm outline-none resize-none"
-            />
-            <Button onClick={send} disabled={streaming}>
-              {streaming ? '…' : '发送'}
-            </Button>
+          <div className="border-t border-border p-3 flex flex-col gap-2">
+            <button onClick={syncDoc} disabled={streaming}
+              className="self-start text-xs text-muted-foreground hover:text-foreground underline">
+              同步最新正文给「{activeEditor?.name}」
+            </button>
+            <div className="flex gap-2">
+              <textarea value={input} onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
+                rows={2}
+                placeholder={`对「${activeEditor?.name}」说…（Enter发送）`}
+                className="flex-1 rounded-md border border-border bg-transparent p-2 text-sm outline-none resize-none" />
+              <Button onClick={send} disabled={streaming}>{streaming ? '…' : '发送'}</Button>
+            </div>
           </div>
         </div>
       </div>
