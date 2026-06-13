@@ -43,7 +43,7 @@ export function MainNav() {
             className={`flex items-center justify-center text-2xl font-serif transition-colors ${
               active ? 'text-foreground' : 'text-muted-foreground/50 hover:text-muted-foreground'
             }`}
-            style={{ fontFamily: 'KaiTi, STKaiti, serif' }}
+          style={{ fontFamily: "'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', sans-serif" }}
           >
             {tab.label}
           </button>
