@@ -48,7 +48,7 @@ export function Chat({
         setMessages={setMessages}
         reload={reload}
       />
-      <form className="flex mx-auto px-4 bg-background pb-24 md:pb-6 gap-2 w-full md:max-w-3xl">
+      <form className="flex mx-auto px-4 bg-background pb-12 md:pb-6 gap-2 w-full md:max-w-3xl">
         <MultimodalInput
           chatId={id}
           input={input}
