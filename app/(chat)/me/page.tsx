@@ -12,18 +12,21 @@ const ITEMS = [
 export default function MePage() {
   const router = useRouter();
   return (
-    <div className="flex flex-col h-dvh overflow-y-auto">
-      <div className="mx-auto w-full max-w-2xl px-4 py-10 flex flex-col gap-6">
-        <h1 className="text-2xl font-semibold">我</h1>
-        <div className="flex flex-col gap-2">
+    <div
+      className="relative flex flex-col h-dvh overflow-y-auto"
+      style={{ background: 'linear-gradient(to bottom, hsl(226 55% 96%), hsl(40 33% 98%) 35%)' }}
+    >
+      <div className="mx-auto w-full max-w-md px-5 py-12 flex flex-col gap-6">
+        <h1 className="text-2xl font-semibold text-foreground px-1">我</h1>
+        <div className="flex flex-col gap-3">
           {ITEMS.map((it) => (
             <button
               key={it.path}
               onClick={() => router.push(it.path)}
-              className="text-left rounded-xl border border-border p-4 hover:bg-muted transition-colors"
+              className="text-left rounded-2xl bg-card/80 backdrop-blur border border-border/60 px-5 py-4 hover:border-primary/40 hover:bg-card transition-all shadow-sm"
             >
-              <div className="text-sm font-medium">{it.label}</div>
-              <div className="text-xs text-muted-foreground">{it.desc}</div>
+              <div className="text-sm font-medium text-foreground">{it.label}</div>
+              <div className="text-xs text-muted-foreground mt-0.5">{it.desc}</div>
             </button>
           ))}
         </div>
