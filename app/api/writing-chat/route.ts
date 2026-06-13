@@ -67,12 +67,12 @@ export async function POST(req: Request) {
         Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
+     body: JSON.stringify({
         model,
         messages: fullMessages,
         stream: true,
+        max_tokens: 16384,
       }),
-    });
 
     if (!res.ok) {
       const t = await res.text();
