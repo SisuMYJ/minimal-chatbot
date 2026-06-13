@@ -98,14 +98,6 @@ export function AppSidebar() {
           variant="ghost"
           type="button"
           className="w-full justify-start text-sm"
-          onClick={() => { setOpenMobile(false); router.push('/reminders'); }}
-        >
-          提醒
-        </Button>
-       <Button
-          variant="ghost"
-          type="button"
-          className="w-full justify-start text-sm"
           onClick={() => { setOpenMobile(false); router.push('/search'); }}
         >
           搜索聊天记录
@@ -114,17 +106,7 @@ export function AppSidebar() {
           onClick={() => { setOpenMobile(false); router.push('/pinned-models'); }}>
           置顶模型
         </Button>
-        <Button
-          variant="ghost"
-          type="button"
-          className="w-full justify-start text-sm"
-          onClick={() => {
-            setOpenMobile(false);
-            router.push('/works');
-          }}
-        >
-          写作区
-        </Button>
+      
         <Button
           variant="ghost"
           type="button"
@@ -137,17 +119,6 @@ export function AppSidebar() {
           待审记忆
         </Button>
         <Button
-          variant="ghost"
-          type="button"
-          className="w-full justify-start text-sm"
-          onClick={() => {
-            setOpenMobile(false);
-            router.push('/settings');
-          }}
-        >
-          人设设置
-        </Button>
-     <Button
           variant="ghost"
           type="button"
           className="w-full justify-start text-sm"
