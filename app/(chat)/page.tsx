@@ -28,7 +28,6 @@ export default function HomePage() {
         else if (d.allBlessings) setBlessing(pickRandom(d.allBlessings));
       }
     });
-    // 天气
     fetch('https://api.open-meteo.com/v1/forecast?latitude=31.23&longitude=121.47&current=temperature_2m,weather_code&timezone=Asia/Shanghai')
       .then((r) => r.json())
       .then((w) => {
@@ -58,10 +57,9 @@ export default function HomePage() {
     setBlessing({ ...blessing, pinned: np });
   };
 
-  // 今天的特别：纪念日优先 > 农历节日 > 公历节日 > 节气 > 农历日期兜底
   const special: string[] = [];
   if (data) {
-    data.anniversaries.forEach((a) => special.push(`· ${a}`));
+    data.anniversaries.forEach((a) => special.push(a));
     if (data.today.lunarFestival) special.push(data.today.lunarFestival);
     if (data.today.festival) special.push(data.today.festival);
     if (data.today.solarTerm) special.push(data.today.solarTerm);
@@ -71,62 +69,60 @@ export default function HomePage() {
   return (
     <div
       className="relative flex flex-col h-dvh overflow-y-auto"
-      style={{ background: 'linear-gradient(to bottom, hsl(226 60% 96%), hsl(40 33% 98%) 45%)' }}
+      style={{ background: 'linear-gradient(to bottom, hsl(226 55% 95%), hsl(40 33% 98%) 40%)' }}
     >
-      {/* 淡淡星月点缀 */}
-      <div className="pointer-events-none absolute top-10 right-10 text-primary/15 text-4xl select-none">✦</div>
-      <div className="pointer-events-none absolute top-24 right-24 text-primary/10 text-2xl select-none">✦</div>
-      <div className="pointer-events-none absolute bottom-20 left-12 text-primary/10 text-3xl select-none">☾</div>
+      <div className="pointer-events-none absolute top-8 right-8 text-primary/15 text-3xl select-none">✦</div>
+      <div className="pointer-events-none absolute top-20 right-20 text-primary/10 text-xl select-none">✦</div>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-16 gap-10 max-w-xl mx-auto w-full">
-        {/* 问候 + 时间天气 */}
-        <div className="text-center flex flex-col gap-1">
-          <h1 className="text-2xl font-medium text-foreground">{greeting}，阿竫</h1>
+      <div className="flex-1 flex flex-col px-5 py-10 gap-5 max-w-md mx-auto w-full">
+        {/* 问候 */}
+        <div className="text-center flex flex-col gap-1 pt-4 pb-2">
+          <h1 className="text-2xl font-semibold text-foreground">{greeting}，阿竫</h1>
           <p className="text-sm text-muted-foreground">
             {dateStr}{weather && ` · ${weather}`}
           </p>
         </div>
 
-        {/* 今天的特别 */}
+        {/* 今天 卡片 */}
         {special.length > 0 && (
-          <div className="flex flex-col items-center gap-1 text-center">
-            <span className="text-xs text-primary/60 tracking-widest">今 天</span>
-            {special.map((s, i) => (
-              <span key={i} className="text-sm text-foreground/80">{s}</span>
-            ))}
+          <div className="rounded-2xl bg-card/70 backdrop-blur border border-border/60 px-5 py-4 flex flex-col items-center gap-1.5 shadow-sm">
+            <span className="text-[11px] text-primary/70 tracking-[0.3em]">今 天</span>
+            <div className="flex flex-wrap justify-center gap-x-3 gap-y-1">
+              {special.map((s, i) => (
+                <span key={i} className="text-sm text-foreground/85">{s}</span>
+              ))}
+            </div>
           </div>
         )}
 
-        {/* 寄语（主角，最大） */}
-        <div className="flex flex-col items-center gap-4 py-6">
+        {/* 寄语 卡片（主角） */}
+        <div className="rounded-2xl bg-card/80 backdrop-blur border border-border/60 px-6 py-10 flex flex-col items-center gap-5 shadow-sm">
           {blessing ? (
             <>
-              <p className="text-xl md:text-2xl leading-relaxed text-center text-foreground whitespace-pre-wrap font-light">
+              <span className="text-primary/40 text-2xl leading-none">❝</span>
+              <p className="text-xl leading-relaxed text-center text-foreground whitespace-pre-wrap font-light">
                 {blessing.content}
               </p>
-              <div className="flex gap-4 text-xs text-muted-foreground">
+              <div className="flex gap-4 text-xs text-muted-foreground pt-2">
                 {!blessing.pinned && data?.allBlessings && data.allBlessings.length > 1 && (
-                  <button onClick={shuffle} className="hover:text-primary">换一句</button>
+                  <button onClick={shuffle} className="hover:text-primary transition-colors">换一句</button>
                 )}
-                <button onClick={togglePin} className="hover:text-primary">
+                <button onClick={togglePin} className="hover:text-primary transition-colors">
                   {blessing.pinned ? '取消固定' : '固定这句'}
                 </button>
               </div>
             </>
           ) : (
-            <p className="text-muted-foreground text-center">收藏喜欢的话，这里会给你一句。</p>
+            <p className="text-muted-foreground text-center py-4">收藏喜欢的话，这里会给你一句。</p>
           )}
         </div>
 
-        {/* 今日提醒 */}
+        {/* 待办 卡片 */}
         {data && data.reminders.length > 0 && (
-          <div className="w-full max-w-sm flex flex-col gap-2">
-            <span className="text-xs text-primary/60 tracking-widest text-center">待 办</span>
+          <div className="rounded-2xl bg-card/70 backdrop-blur border border-border/60 px-5 py-4 flex flex-col gap-2.5 shadow-sm">
+            <span className="text-[11px] text-primary/70 tracking-[0.3em] text-center">待 办</span>
             {data.reminders.map((r) => (
-              <div
-                key={r.id}
-                className="rounded-xl bg-card/60 border border-border px-4 py-2 text-sm text-foreground/90 flex justify-between items-center"
-              >
+              <div key={r.id} className="flex justify-between items-center text-sm text-foreground/85 border-b border-border/40 last:border-0 pb-2 last:pb-0">
                 <span>{r.content}</span>
                 {r.remind_at && (
                   <span className="text-xs text-muted-foreground shrink-0 ml-2">
@@ -135,7 +131,7 @@ export default function HomePage() {
                 )}
               </div>
             ))}
-            <button onClick={() => router.push('/reminders')} className="text-xs text-muted-foreground hover:text-primary self-center mt-1">
+            <button onClick={() => router.push('/reminders')} className="text-xs text-muted-foreground hover:text-primary self-center mt-1 transition-colors">
               查看全部
             </button>
           </div>
