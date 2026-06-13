@@ -226,6 +226,7 @@ export async function POST(request: Request) {
         system: systemPrompt,
         messages: coreMessages,
         maxSteps: 5,
+        maxTokens: 16384,
 tools: {
           searchMemory: tool({
             description:
