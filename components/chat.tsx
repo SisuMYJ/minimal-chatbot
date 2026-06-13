@@ -35,8 +35,9 @@ export function Chat({
   });
 
   return (
-    <div className="flex flex-col min-w-0 h-dvh bg-background">
- <ChatHeader
+    <div className="relative flex h-dvh min-w-0 flex-col overflow-hidden bg-transparent">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-[#8fd3e8]/18 via-primary/5 to-transparent" />
+      <ChatHeader
         chatId={id}
         selectedModelId={currentModelId}
         onModelChange={setCurrentModelId}
@@ -48,7 +49,7 @@ export function Chat({
         setMessages={setMessages}
         reload={reload}
       />
-      <form className="flex mx-auto px-4 bg-background pb-12 md:pb-6 gap-2 w-full md:max-w-3xl">
+      <form className="relative z-10 flex mx-auto px-4 pb-12 md:pb-6 gap-2 w-full md:max-w-3xl">
         <MultimodalInput
           chatId={id}
           input={input}

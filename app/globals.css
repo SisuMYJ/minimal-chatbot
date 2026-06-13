@@ -10,40 +10,40 @@
 
 @layer base {
     :root {
-        /* 暖白底 + 克莱因蓝点缀 —— 偏亮主题 */
-        --background: 40 33% 98%;          /* 暖白（带一点点暖黄，不刺眼） */
-        --foreground: 222 22% 18%;          /* 深墨蓝灰，不是纯黑，柔和 */
-        --card: 40 33% 99%;
-        --card-foreground: 222 22% 18%;
-        --popover: 40 33% 99%;
-        --popover-foreground: 222 22% 18%;
-        --primary: 226 68% 38%;             /* 克莱因蓝（重点色：按钮/高亮） */
-        --primary-foreground: 40 33% 98%;
-        --secondary: 40 20% 94%;            /* 浅暖灰 */
-        --secondary-foreground: 222 22% 22%;
-        --muted: 40 20% 95%;
-        --muted-foreground: 222 10% 45%;
-        --accent: 226 60% 95%;              /* 极浅的蓝（hover背景） */
-        --accent-foreground: 226 68% 38%;
+        /* 墨色飘带：冷白纸面、墨黑线条、浅蓝空气感 */
+        --background: 190 22% 98%;
+        --foreground: 220 10% 9%;
+        --card: 0 0% 100%;
+        --card-foreground: 220 10% 9%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 220 10% 9%;
+        --primary: 220 10% 9%;
+        --primary-foreground: 190 22% 98%;
+        --secondary: 198 28% 92%;
+        --secondary-foreground: 220 10% 14%;
+        --muted: 195 22% 94%;
+        --muted-foreground: 210 8% 43%;
+        --accent: 198 58% 90%;
+        --accent-foreground: 220 10% 10%;
         --destructive: 0 72% 51%;
         --destructive-foreground: 0 0% 98%;
-        --border: 40 15% 89%;               /* 轻暖灰边框 */
-        --input: 40 15% 89%;
-        --ring: 226 68% 38%;
-        --radius: 0.75rem;                  /* 圆角更柔和 */
-        --sidebar-background: 40 30% 97%;
-        --sidebar-foreground: 222 15% 30%;
-        --sidebar-primary: 226 68% 38%;
-        --sidebar-primary-foreground: 40 33% 98%;
-        --sidebar-accent: 226 60% 95%;
-        --sidebar-accent-foreground: 226 68% 38%;
-        --sidebar-border: 40 15% 89%;
-        --sidebar-ring: 226 68% 38%;
-        --chart-1: 226 68% 38%;
-        --chart-2: 173 58% 39%;
-        --chart-3: 43 74% 66%;
-        --chart-4: 280 50% 55%;
-        --chart-5: 12 70% 60%;
+        --border: 210 18% 87%;
+        --input: 210 18% 87%;
+        --ring: 204 72% 44%;
+        --radius: 1.05rem;
+        --sidebar-background: 190 22% 97%;
+        --sidebar-foreground: 220 10% 17%;
+        --sidebar-primary: 220 10% 9%;
+        --sidebar-primary-foreground: 190 22% 98%;
+        --sidebar-accent: 198 58% 90%;
+        --sidebar-accent-foreground: 220 10% 10%;
+        --sidebar-border: 210 18% 87%;
+        --sidebar-ring: 204 72% 44%;
+        --chart-1: 220 10% 9%;
+        --chart-2: 198 60% 62%;
+        --chart-3: 39 60% 66%;
+        --chart-4: 218 22% 48%;
+        --chart-5: 4 28% 50%;
     }
 }
 
@@ -54,6 +54,12 @@
 
     body {
         @apply bg-background text-foreground;
+        min-height: 100dvh;
+        background:
+            radial-gradient(circle at 14% 10%, hsl(198 72% 72% / 0.22), transparent 26rem),
+            radial-gradient(circle at 88% 12%, hsl(218 40% 78% / 0.18), transparent 24rem),
+            radial-gradient(circle at 70% 86%, hsl(39 70% 74% / 0.13), transparent 22rem),
+            linear-gradient(180deg, hsl(190 22% 98%) 0%, hsl(204 20% 96%) 100%);
         font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
         -webkit-font-smoothing: antialiased;
     }
