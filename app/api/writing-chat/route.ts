@@ -73,7 +73,7 @@ export async function POST(req: Request) {
         stream: true,
         max_tokens: 16384,
       }),
-
+   });
     if (!res.ok) {
       const t = await res.text();
       return new Response(JSON.stringify({ error: t }), { status: 500 });
