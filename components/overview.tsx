@@ -57,13 +57,13 @@ export const Overview = () => {
   return (
     <motion.div
       key="overview"
-      className="max-w-3xl mx-auto md:mt-20 px-4"
+      className="max-w-3xl mx-auto md:mt-20"
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ delay: 0.3 }}
     >
-      <div className="rounded-[1.9rem] border border-border/70 bg-card/78 p-8 flex flex-col gap-6 items-center text-center max-w-xl shadow-[0_24px_74px_-56px_rgba(24,32,40,0.55)] backdrop-blur-xl">
+      <div className="rounded-xl p-8 flex flex-col gap-6 items-center text-center max-w-xl">
         {loading ? (
           <p className="text-muted-foreground">…</p>
         ) : blessing ? (
