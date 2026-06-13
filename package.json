@@ -11,6 +11,7 @@
     "format": "biome format --write --diagnostic-level=error"
   },
   "dependencies": {
+    "lunar-javascript": "^1.6.12",
     "@supabase/supabase-js": "^2.45.0",
     "@ai-sdk/openai": "1.1.5",
     "@codemirror/lang-python": "^6.1.7",
