@@ -65,7 +65,7 @@ export default function StyleDemoPage() {
         <header className="relative overflow-hidden rounded-[2.6rem] border border-black/10 bg-white/70 p-6 shadow-[0_32px_110px_-78px_rgba(27,35,42,0.5)] backdrop-blur md:p-8">
           <Ribbon className="absolute -right-14 top-8 w-72 text-[#2f8fc5]/30" />
           <span className="rounded-full border border-[#2f8fc5]/15 bg-[#2f8fc5]/[0.04] px-3 py-1 text-xs tracking-[0.34em] text-[#2f8fc5]">
-            STYLE LAB · AIRBORNE
+            STYLE AIRBORNE
           </span>
           <h1 className="mt-5 max-w-4xl text-4xl font-semibold tracking-[-0.065em] md:text-6xl">
             白纸、风、黑线，和一点会飞的童话
