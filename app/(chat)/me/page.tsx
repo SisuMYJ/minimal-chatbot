@@ -8,6 +8,7 @@ const ITEMS = [
   { label: '提醒', path: '/reminders', desc: 'AI 记下的待办' },
   { label: '搜索聊天记录', path: '/search', desc: '关键词搜所有对话' },
   { label: '余量', path: '/balance', desc: '余额与消耗' },
+  { label: '纪念日', path: '/anniversaries', desc: '生日、特别的日子，到了首页会标出来' },
 ];
 
 export default function MePage() {
