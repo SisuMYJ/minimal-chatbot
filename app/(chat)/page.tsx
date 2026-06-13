@@ -69,10 +69,10 @@ export default function HomePage() {
   return (
     <div
       className="relative flex flex-col h-dvh overflow-y-auto"
-      style={{ background: 'linear-gradient(180deg, hsl(42 58% 97%), hsl(40 50% 95%) 42%, hsl(43 72% 96%))' }}
+      style={{ background: 'linear-gradient(to bottom, hsl(226 55% 95%), hsl(40 33% 98%) 40%)' }}
     >
-      <div className="pointer-events-none absolute top-8 right-8 text-primary/20 text-3xl select-none">✦</div>
-      <div className="pointer-events-none absolute top-20 right-20 text-[#f5b82e]/30 text-xl select-none">✦</div>
+      <div className="pointer-events-none absolute top-8 right-8 text-primary/15 text-3xl select-none">✦</div>
+      <div className="pointer-events-none absolute top-20 right-20 text-primary/10 text-xl select-none">✦</div>
 
       <div className="flex-1 flex flex-col px-5 py-10 gap-5 max-w-md mx-auto w-full">
         {/* 问候 */}
@@ -85,7 +85,7 @@ export default function HomePage() {
 
         {/* 今天 卡片 */}
         {special.length > 0 && (
-          <div className="rounded-[1.7rem] bg-card/78 backdrop-blur border border-border/70 px-5 py-4 flex flex-col items-center gap-1.5 shadow-[0_18px_55px_-42px_rgba(55,43,31,0.45)]">
+          <div className="rounded-2xl bg-card/70 backdrop-blur border border-border/60 px-5 py-4 flex flex-col items-center gap-1.5 shadow-sm">
             <span className="text-[11px] text-primary/70 tracking-[0.3em]">今 天</span>
             <div className="flex flex-wrap justify-center gap-x-3 gap-y-1">
               {special.map((s, i) => (
@@ -96,7 +96,7 @@ export default function HomePage() {
         )}
 
         {/* 寄语 卡片（主角） */}
-        <div className="rounded-[1.9rem] bg-card/85 backdrop-blur border border-border/70 px-6 py-10 flex flex-col items-center gap-5 shadow-[0_24px_70px_-48px_rgba(55,43,31,0.5)]">
+        <div className="rounded-2xl bg-card/80 backdrop-blur border border-border/60 px-6 py-10 flex flex-col items-center gap-5 shadow-sm">
           {blessing ? (
             <>
               <span className="text-primary/40 text-2xl leading-none">❝</span>
