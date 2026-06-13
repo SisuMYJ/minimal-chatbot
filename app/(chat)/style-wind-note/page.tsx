@@ -25,7 +25,7 @@ export default function StyleDemoPage() {
 
           <div className="relative z-10 flex h-full max-w-3xl flex-col justify-end pt-44 md:pt-64">
             <span className="w-fit rounded-full border border-[#4a9ed1]/15 bg-[#4a9ed1]/[0.05] px-3 py-1 text-xs tracking-[0.34em] text-[#2f8fc5]">
-              STYLE AIRBORNE · ONE DIRECTION
+              STYLE WIND NOTE
             </span>
             <h1 className="mt-5 text-5xl font-semibold tracking-[-0.075em] md:text-7xl">
               风中边注
