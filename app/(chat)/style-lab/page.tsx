@@ -59,7 +59,7 @@ export default function StyleDemoPage() {
       <section className="relative mx-auto flex w-full max-w-7xl flex-col gap-8 px-5 py-8 md:px-10 md:py-12">
         <header className="overflow-hidden rounded-[2.4rem] border border-black/10 bg-white/62 p-6 shadow-[0_30px_100px_-74px_rgba(35,28,22,0.58)] backdrop-blur md:p-8">
           <span className="rounded-full border border-[#b13a2f]/15 bg-[#b13a2f]/[0.04] px-3 py-1 text-xs tracking-[0.34em] text-[#b13a2f]">
-            STYLE DEMO · NEW MOOD
+            STYLE LAB · NEW MOOD
           </span>
           <h1 className="mt-5 text-4xl font-semibold tracking-[-0.06em] md:text-6xl">
             不再锁死蓝色，先找你的心跳
