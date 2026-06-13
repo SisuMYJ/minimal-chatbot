@@ -57,26 +57,21 @@ export const Overview = () => {
   return (
     <motion.div
       key="overview"
-      className="mx-auto max-w-3xl px-4 md:mt-20"
+      className="max-w-3xl mx-auto md:mt-20"
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ delay: 0.3 }}
     >
-      <div className="relative flex max-w-xl flex-col items-center gap-6 overflow-hidden rounded-[2rem] border border-white/70 bg-card/72 p-8 text-center shadow-[0_28px_80px_-48px_hsl(243_100%_39%/0.7)] backdrop-blur-xl dark:border-white/10">
-        <div className="pointer-events-none absolute -right-10 -top-10 size-32 rounded-full bg-primary/10 blur-2xl" />
-        <div className="pointer-events-none absolute -bottom-12 left-10 size-28 rounded-full bg-rose-200/40 blur-2xl dark:bg-rose-500/10" />
-        <div className="relative flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/20">
-          ♥
-        </div>
+      <div className="rounded-xl p-8 flex flex-col gap-6 items-center text-center max-w-xl">
         {loading ? (
-          <p className="relative text-muted-foreground">…</p>
+          <p className="text-muted-foreground">…</p>
         ) : blessing ? (
           <>
-            <p className="relative whitespace-pre-wrap text-lg leading-relaxed">
+            <p className="text-lg leading-relaxed whitespace-pre-wrap">
               {blessing.content}
             </p>
-            <div className="relative flex gap-4 text-xs text-muted-foreground">
+            <div className="flex gap-4 text-xs text-muted-foreground">
               {!blessing.pinned && all.length > 1 && (
                 <button onClick={shuffle} className="hover:text-foreground">换一句</button>
               )}
@@ -86,8 +81,8 @@ export const Overview = () => {
             </div>
           </>
         ) : (
-          <p className="relative leading-relaxed text-muted-foreground">
-            把喜欢的话收藏起来吧。以后打开这里，会先递给你一句温柔的回声。
+          <p className="text-muted-foreground leading-relaxed">
+            右键收藏喜欢的话，这里会随机给你一句。
           </p>
         )}
       </div>

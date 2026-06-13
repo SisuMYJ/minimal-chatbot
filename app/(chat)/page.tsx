@@ -81,13 +81,6 @@ export default function HomePage() {
           <p className="text-sm text-muted-foreground">
             {dateStr}{weather && ` · ${weather}`}
           </p>
-          <button
-            type="button"
-            onClick={() => router.push('/style-demo-v2')}
-            className="mx-auto mt-3 rounded-full border border-primary/15 bg-card/70 px-4 py-2 text-xs text-primary shadow-sm transition-colors hover:bg-accent"
-          >
-            查看成人恋爱 demo
-          </button>
         </div>
 
         {/* 今天 卡片 */}

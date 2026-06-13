@@ -77,7 +77,7 @@ function PureChatHeader({
   };
 
   return (
-    <header className="sticky top-0 z-20 mx-2 mt-2 flex items-center gap-2 rounded-3xl border border-white/60 bg-card/72 px-3 py-2 shadow-[0_18px_55px_-35px_hsl(243_100%_39%/0.55)] backdrop-blur-xl dark:border-white/10">
+    <header className="flex sticky top-0 z-20 bg-background/90 backdrop-blur py-2 items-center px-3 gap-2 border-b border-border/50">
       <SidebarToggle />
 
       {(!open || windowWidth < 768) && (
@@ -85,7 +85,7 @@ function PureChatHeader({
           <TooltipTrigger asChild>
             <Button
               variant="outline"
-              className="h-[34px] rounded-full border-primary/15 bg-background/70 px-2 shadow-sm"
+              className="px-2 h-[34px]"
               onClick={() => { router.push('/go-chat'); router.refresh(); }}
             >
               <PlusIcon />
@@ -108,7 +108,7 @@ function PureChatHeader({
         {pendingCount > 0 && (
           <Button
             variant="ghost"
-            className="h-[34px] rounded-full px-2.5 text-xs text-primary hover:bg-accent"
+            className="h-[34px] px-2.5 text-xs text-primary hover:bg-accent"
             onClick={() => router.push('/memory')}
           >
             待审 {pendingCount}
@@ -118,7 +118,7 @@ function PureChatHeader({
         {/* 搜索：放大镜，点了去搜索页 */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" className="h-[34px] w-[34px] rounded-full p-0" onClick={() => router.push('/search')}>
+            <Button variant="ghost" className="h-[34px] w-[34px] p-0" onClick={() => router.push('/search')}>
               <SearchGlass />
             </Button>
           </TooltipTrigger>
@@ -128,7 +128,7 @@ function PureChatHeader({
         {/* 余量：点开才看 */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" className="h-[34px] w-[34px] rounded-full p-0" onClick={openBalance}>
+            <Button variant="ghost" className="h-[34px] w-[34px] p-0" onClick={openBalance}>
               <CoinIcon />
             </Button>
           </TooltipTrigger>
@@ -138,7 +138,7 @@ function PureChatHeader({
         {/* 沉淀这段 */}
         <Button
           variant="outline"
-          className="h-[34px] rounded-full border-primary/20 bg-background/70 px-3 py-1.5 text-xs text-primary shadow-sm hover:bg-accent"
+          className="py-1.5 px-3 h-[34px] text-xs"
           disabled={sedimenting}
           onClick={sedimentNow}
         >
@@ -148,7 +148,7 @@ function PureChatHeader({
 
       {/* 余量弹出小面板 */}
       {showBalance && (
-        <div className="absolute right-3 top-14 z-30 flex w-60 flex-col gap-2 rounded-3xl border border-white/70 bg-card/90 p-4 text-sm shadow-2xl shadow-primary/10 backdrop-blur-xl dark:border-white/10">
+        <div className="absolute right-3 top-14 z-30 w-60 rounded-xl border border-border bg-card p-4 shadow-lg flex flex-col gap-2 text-sm">
           <div className="flex justify-between">
             <span className="text-muted-foreground">剩余</span>
             <span>{balance ? `$${balance.remaining.toFixed(3)}` : '查询中…'}</span>

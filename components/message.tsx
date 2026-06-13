@@ -44,7 +44,7 @@ const PurePreviewMessage = ({
       >
         <div
           className={cn(
-            'flex w-full gap-4 group-data-[role=user]/message:ml-auto group-data-[role=user]/message:max-w-2xl',
+            'flex gap-4 w-full group-data-[role=user]/message:ml-auto group-data-[role=user]/message:max-w-2xl',
             {
               'w-full': mode === 'edit',
               'group-data-[role=user]/message:w-fit': mode !== 'edit',
@@ -52,7 +52,7 @@ const PurePreviewMessage = ({
           )}
         >
           {message.role === 'assistant' && (
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-full border border-primary/15 bg-card/80 text-primary shadow-sm ring-4 ring-primary/5 backdrop-blur">
+            <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border bg-background">
               <div className="translate-y-px">
                 <SparklesIcon size={14} />
               </div>
@@ -64,9 +64,9 @@ const PurePreviewMessage = ({
             {message.experimental_attachments &&
               message.experimental_attachments.length > 0 && (
                 <div className="flex flex-wrap gap-2 justify-end">
-                  {message.experimental_attachments.map((att, i) =>
-                    att.contentType?.startsWith('image/') ? (
-                      <a
+                  {message.experimental_attachments.map((att, i) => (
+                   att.contentType?.startsWith('image/') ? (
+                        <a
                         key={i}
                         href={att.url}
                         target="_blank"
@@ -77,11 +77,11 @@ const PurePreviewMessage = ({
                         <img
                           src={att.url}
                           alt={att.name || 'image'}
-                          className="max-w-[240px] rounded-3xl border border-white/70 shadow-lg shadow-primary/5 hover:opacity-90 cursor-pointer dark:border-white/10"
+                          className="max-w-[240px] rounded-lg border border-border hover:opacity-90 cursor-pointer"
                         />
                       </a>
-                    ) : null,
-                  )}
+                    ) : null
+                  ))}
                 </div>
               )}
             {message.content && mode === 'view' && (
@@ -103,12 +103,10 @@ const PurePreviewMessage = ({
                   </Tooltip>
                 )}
 
-                <div
-                  className={cn('flex flex-col gap-4 leading-relaxed', {
-                    'rounded-[1.35rem] rounded-tr-md bg-primary px-4 py-2.5 text-primary-foreground shadow-lg shadow-primary/15':
+<div
+                  className={cn('flex flex-col gap-4', {
+                    'bg-primary text-primary-foreground px-3 py-2 rounded-xl':
                       message.role === 'user',
-                    'rounded-[1.35rem] rounded-tl-md border border-white/70 bg-card/70 px-4 py-3 shadow-sm backdrop-blur dark:border-white/10':
-                      message.role === 'assistant',
                   })}
                 >
                   <Markdown>{message.content}</Markdown>
@@ -224,7 +222,7 @@ export const ThinkingMessage = () => {
 
   return (
     <motion.div
-        className="w-full mx-auto max-w-3xl px-4 group/message "
+      className="w-full mx-auto max-w-3xl px-4 group/message "
       initial={{ y: 5, opacity: 0 }}
       animate={{ y: 0, opacity: 1, transition: { delay: 1 } }}
       data-role={role}
@@ -237,13 +235,13 @@ export const ThinkingMessage = () => {
           },
         )}
       >
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-full border border-primary/15 bg-card/80 text-primary shadow-sm ring-4 ring-primary/5">
+        <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border">
           <SparklesIcon size={14} />
         </div>
 
         <div className="flex flex-col gap-2 w-full">
           <div className="flex flex-col gap-4 text-muted-foreground">
-            正在慢慢想…
+            Thinking...
           </div>
         </div>
       </div>

@@ -10,68 +10,40 @@
 
 @layer base {
     :root {
-        /* 私人日常 AI 空间：暖白留白、克莱因蓝点睛、轻玫瑰甜感 */
-        --background: 39 45% 98%;
-        --foreground: 225 24% 16%;
-        --card: 36 50% 99%;
+        /* 暖白底 + 克莱因蓝点缀 —— 偏亮主题 */
+        --background: 40 33% 98%;          /* 暖白（带一点点暖黄，不刺眼） */
+        --foreground: 222 22% 18%;          /* 深墨蓝灰，不是纯黑，柔和 */
+        --card: 40 33% 99%;
         --card-foreground: 222 22% 18%;
-        --popover: 36 50% 99%;
+        --popover: 40 33% 99%;
         --popover-foreground: 222 22% 18%;
-        --primary: 243 100% 39%;            /* Klein Blue / #002FA7 */
-        --primary-foreground: 42 60% 98%;
-        --secondary: 34 35% 94%;
-        --secondary-foreground: 225 22% 22%;
-        --muted: 34 38% 95%;
-        --muted-foreground: 225 11% 46%;
-        --accent: 244 76% 96%;
-        --accent-foreground: 243 100% 34%;
+        --primary: 226 68% 38%;             /* 克莱因蓝（重点色：按钮/高亮） */
+        --primary-foreground: 40 33% 98%;
+        --secondary: 40 20% 94%;            /* 浅暖灰 */
+        --secondary-foreground: 222 22% 22%;
+        --muted: 40 20% 95%;
+        --muted-foreground: 222 10% 45%;
+        --accent: 226 60% 95%;              /* 极浅的蓝（hover背景） */
+        --accent-foreground: 226 68% 38%;
         --destructive: 0 72% 51%;
         --destructive-foreground: 0 0% 98%;
-        --border: 34 28% 88%;
-        --input: 34 28% 88%;
-        --ring: 243 100% 39%;
-        --radius: 1.15rem;
-        --sidebar-background: 36 45% 97%;
-        --sidebar-foreground: 225 16% 31%;
-        --sidebar-primary: 243 100% 39%;
+        --border: 40 15% 89%;               /* 轻暖灰边框 */
+        --input: 40 15% 89%;
+        --ring: 226 68% 38%;
+        --radius: 0.75rem;                  /* 圆角更柔和 */
+        --sidebar-background: 40 30% 97%;
+        --sidebar-foreground: 222 15% 30%;
+        --sidebar-primary: 226 68% 38%;
         --sidebar-primary-foreground: 40 33% 98%;
-        --sidebar-accent: 244 76% 96%;
-        --sidebar-accent-foreground: 243 100% 34%;
+        --sidebar-accent: 226 60% 95%;
+        --sidebar-accent-foreground: 226 68% 38%;
         --sidebar-border: 40 15% 89%;
-        --sidebar-ring: 243 100% 39%;
-        --chart-1: 243 100% 39%;
-        --chart-2: 340 73% 82%;
-        --chart-3: 38 78% 70%;
-        --chart-4: 265 54% 68%;
-        --chart-5: 12 70% 72%;
-    }
-
-    .dark {
-        --background: 230 30% 8%;
-        --foreground: 38 36% 93%;
-        --card: 230 28% 10%;
-        --card-foreground: 38 36% 93%;
-        --popover: 230 28% 10%;
-        --popover-foreground: 38 36% 93%;
-        --primary: 243 100% 62%;
-        --primary-foreground: 42 60% 98%;
-        --secondary: 229 20% 15%;
-        --secondary-foreground: 38 32% 91%;
-        --muted: 229 20% 15%;
-        --muted-foreground: 38 13% 66%;
-        --accent: 239 45% 20%;
-        --accent-foreground: 232 100% 86%;
-        --border: 229 18% 21%;
-        --input: 229 18% 21%;
-        --ring: 243 100% 62%;
-        --sidebar-background: 230 28% 9%;
-        --sidebar-foreground: 38 25% 86%;
-        --sidebar-primary: 243 100% 62%;
-        --sidebar-primary-foreground: 42 60% 98%;
-        --sidebar-accent: 239 45% 20%;
-        --sidebar-accent-foreground: 232 100% 86%;
-        --sidebar-border: 229 18% 21%;
-        --sidebar-ring: 243 100% 62%;
+        --sidebar-ring: 226 68% 38%;
+        --chart-1: 226 68% 38%;
+        --chart-2: 173 58% 39%;
+        --chart-3: 43 74% 66%;
+        --chart-4: 280 50% 55%;
+        --chart-5: 12 70% 60%;
     }
 }
 
@@ -82,20 +54,8 @@
 
     body {
         @apply bg-background text-foreground;
-        min-height: 100dvh;
-        background:
-            radial-gradient(circle at 18% 12%, hsl(243 100% 39% / 0.12), transparent 28rem),
-            radial-gradient(circle at 84% 18%, hsl(340 84% 86% / 0.24), transparent 22rem),
-            linear-gradient(180deg, hsl(39 45% 98%) 0%, hsl(36 42% 96%) 100%);
         font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
         -webkit-font-smoothing: antialiased;
-    }
-
-    .dark body {
-        background:
-            radial-gradient(circle at 18% 12%, hsl(243 100% 62% / 0.16), transparent 28rem),
-            radial-gradient(circle at 84% 18%, hsl(340 70% 56% / 0.10), transparent 22rem),
-            linear-gradient(180deg, hsl(230 30% 8%) 0%, hsl(230 32% 6%) 100%);
     }
 }
 
