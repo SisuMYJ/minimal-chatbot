@@ -168,7 +168,7 @@ function PureMultimodalInput({
   }, [handleSubmit, setLocalStorageInput, width, chatId, attachments]);
 
   return (
-    <div className="relative w-full flex flex-col gap-4 max-w-full overflow-x-hidden">
+    <div className="relative flex w-full max-w-full flex-col gap-4 overflow-x-hidden rounded-[2rem] border border-white/70 bg-card/82 p-1 shadow-[0_24px_70px_-38px_hsl(243_100%_39%/0.65)] backdrop-blur-xl dark:border-white/10">
       <input
         ref={fileInputRef}
         type="file"
@@ -197,14 +197,14 @@ function PureMultimodalInput({
             <div key={i} className="relative">
               {a.type.startsWith('image/') ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={a.url} alt={a.name} className="size-16 object-cover rounded-md border border-border" />
+                <img src={a.url} alt={a.name} className="size-16 object-cover rounded-2xl border border-border" />
               ) : (
-                <div className="size-16 flex items-center justify-center rounded-md border border-border text-xs p-1 text-center">{a.name}</div>
+                <div className="size-16 flex items-center justify-center rounded-2xl border border-border text-xs p-1 text-center">{a.name}</div>
               )}
               <button
                 type="button"
                 onClick={() => setAttachments((prev) => prev.filter((_, idx) => idx !== i))}
-                className="absolute -top-1 -right-1 bg-background border border-border rounded-full size-5 text-xs leading-none"
+                className="absolute -right-1 -top-1 size-5 rounded-full border border-border bg-background text-xs leading-none shadow-sm"
               >×</button>
             </div>
           ))}
@@ -217,7 +217,7 @@ function PureMultimodalInput({
         value={input}
         onChange={handleInput}
         className={cx(
-          'min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl !text-base bg-muted pb-10 pl-12 dark:border-zinc-700',
+          'min-h-[24px] max-h-[calc(75dvh)] resize-none overflow-hidden rounded-[1.65rem] border-0 bg-transparent pb-10 pl-12 pr-12 !text-base leading-relaxed shadow-none placeholder:text-muted-foreground/70 focus-visible:ring-0 focus-visible:ring-offset-0',
           className,
         )}
         rows={2}
@@ -235,11 +235,11 @@ function PureMultimodalInput({
       />
 
     {/* 左下：上传 + 表情 */}
-      <div className="absolute bottom-0 left-0 p-2 flex gap-1">
+      <div className="absolute bottom-1 left-1 flex gap-1 p-2">
         <Button
           type="button"
           variant="ghost"
-          className="rounded-full p-1.5 h-fit"
+          className="h-fit rounded-full p-1.5 text-muted-foreground hover:text-primary"
           disabled={uploading}
           onClick={() => fileInputRef.current?.click()}
         >
@@ -248,7 +248,7 @@ function PureMultimodalInput({
         <Button
           type="button"
           variant="ghost"
-          className="rounded-full p-1.5 h-fit"
+          className="h-fit rounded-full p-1.5 text-muted-foreground hover:text-primary"
           onClick={() => setShowStickers((v) => !v)}
         >
           <SmileIcon size={16} />
@@ -257,7 +257,7 @@ function PureMultimodalInput({
 
       {/* 表情面板 */}
       {showStickers && (
-        <div className="absolute bottom-14 left-0 z-10 w-72 max-h-64 overflow-y-auto rounded-xl border border-border bg-background p-2 shadow-lg">
+        <div className="absolute bottom-16 left-1 z-10 max-h-64 w-72 overflow-y-auto rounded-3xl border border-white/70 bg-card/95 p-3 shadow-2xl shadow-primary/10 backdrop-blur-xl dark:border-white/10">
           <div className="flex items-center justify-between mb-2 px-1">
             <span className="text-xs text-muted-foreground">我的表情</span>
             <button
@@ -272,7 +272,7 @@ function PureMultimodalInput({
             {stickers.map((s) => (
               <button key={s.id} type="button" onClick={() => sendSticker(s.url)}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={s.url} alt="sticker" className="size-14 object-cover rounded-md hover:ring-2 ring-foreground" />
+                <img src={s.url} alt="sticker" className="size-14 object-cover rounded-2xl ring-primary hover:ring-2" />
               </button>
             ))}
           </div>
@@ -280,7 +280,7 @@ function PureMultimodalInput({
       )}
 
       {/* 发送/停止（右下） */}
-      <div className="absolute bottom-0 right-0 p-2 w-fit flex flex-row justify-end">
+      <div className="absolute bottom-1 right-1 flex w-fit flex-row justify-end p-2">
         {isLoading ? (
           <StopButton stop={stop} setMessages={setMessages} />
         ) : (
@@ -309,7 +309,7 @@ function PureStopButton({
 }) {
   return (
     <Button
-      className="rounded-full p-1.5 h-fit border dark:border-zinc-600"
+      className="h-fit rounded-full border border-primary/20 bg-primary p-1.5 text-primary-foreground shadow-lg shadow-primary/20"
       onClick={(event) => {
         event.preventDefault();
         stop();
@@ -333,7 +333,7 @@ function PureSendButton({
 }) {
   return (
     <Button
-      className="rounded-full p-1.5 h-fit border dark:border-zinc-600"
+      className="h-fit rounded-full border border-primary/20 bg-primary p-1.5 text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90"
       onClick={(event) => {
         event.preventDefault();
         submitForm();
