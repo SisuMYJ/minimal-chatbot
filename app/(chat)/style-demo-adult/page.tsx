@@ -50,7 +50,7 @@ export default function StyleDemoPage() {
       <section className="relative mx-auto flex w-full max-w-7xl flex-col gap-8 px-5 py-8 md:px-10 md:py-12">
         <header className="overflow-hidden rounded-[2.25rem] border border-[#eadfc9] bg-white/72 p-6 shadow-[0_28px_90px_-66px_rgba(55,43,31,0.55)] backdrop-blur md:p-8">
           <span className="rounded-full border border-[#002fa7]/15 bg-[#002fa7]/[0.04] px-3 py-1 text-xs tracking-[0.34em] text-[#002fa7]">
-            STYLE DEMO · ROUND 2
+            STYLE DEMO · ADULT
           </span>
           <h1 className="mt-5 text-4xl font-semibold tracking-[-0.055em] md:text-6xl">
             成人恋爱的蓝与金
