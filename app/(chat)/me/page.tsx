@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 const ITEMS = [
   { label: '人设设置', path: '/settings', desc: '他是谁、怎么说话、写作沟通原则' },
   { label: '编辑名单', path: '/editors', desc: '改稿用哪几个模型' },
-  { label: '置顶模型', path: '/pinned-models', desc: '对话框显示哪些模型' },
-  { label: '待审记忆', path: '/memory', desc: '审核沉淀出的记忆' },
   { label: '提醒', path: '/reminders', desc: 'AI 记下的待办' },
   { label: '搜索聊天记录', path: '/search', desc: '关键词搜所有对话' },
   { label: '余量', path: '/balance', desc: '余额与消耗' },
