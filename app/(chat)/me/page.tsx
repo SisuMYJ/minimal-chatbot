@@ -14,19 +14,19 @@ export default function MePage() {
   return (
     <div
       className="relative flex flex-col h-dvh overflow-y-auto"
-      style={{ background: 'linear-gradient(to bottom, hsl(226 55% 96%), hsl(40 33% 98%) 35%)' }}
+      style={{ background: 'linear-gradient(to bottom, hsl(226 55% 96%), hsl(40 33% 98%) 30%)' }}
     >
-      <div className="mx-auto w-full max-w-md px-5 py-12 flex flex-col gap-6">
+      <div className="w-full px-5 py-12 flex flex-col gap-6 max-w-3xl mx-auto">
         <h1 className="text-2xl font-semibold text-foreground px-1">我</h1>
-        <div className="flex flex-col gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {ITEMS.map((it) => (
             <button
               key={it.path}
               onClick={() => router.push(it.path)}
-              className="text-left rounded-2xl bg-card/80 backdrop-blur border border-border/60 px-5 py-4 hover:border-primary/40 hover:bg-card transition-all shadow-sm"
+              className="text-left rounded-2xl bg-card/80 backdrop-blur border border-border/60 px-6 py-6 hover:border-primary/40 hover:bg-card transition-all shadow-sm flex flex-col gap-2 min-h-[110px] justify-center"
             >
-              <div className="text-sm font-medium text-foreground">{it.label}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">{it.desc}</div>
+              <div className="text-base font-medium text-foreground">{it.label}</div>
+              <div className="text-xs text-muted-foreground leading-relaxed">{it.desc}</div>
             </button>
           ))}
         </div>
